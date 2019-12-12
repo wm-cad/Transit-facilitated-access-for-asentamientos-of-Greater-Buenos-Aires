@@ -1,0 +1,394 @@
+<html>
+<head>
+  <meta charset='utf-8' />
+  <title>Asentamientos in Buenos Aires, Argentina</title>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <script src='https://api.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.css' rel='stylesheet' />
+  <style>
+    body { margin:0; padding:0; }
+    #map { position:absolute; top:0; bottom:0; width:100%; }
+  </style>
+</head>
+<body>
+
+<style>
+  #menu {
+    background: #fff;
+    position: absolute;
+    z-index: 1;
+    top: 10px;
+    right: 10px;
+    border-radius: 4px;
+    width: 200px;
+    border: 2px solid rgba(0,0,0,0.4);
+    font-family: 'Open Sans', sans-serif;
+  }
+
+#menu a {
+    font-size: 14px;
+    color: #404040;
+    display: block;
+    margin: 0;
+    padding: 0;
+    padding: 10px;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(0,0,0,0.25);
+    text-align: left;
+  }
+
+#menu a:last-child {
+    border: none;
+  }
+
+#menu a:hover {
+    background-color: #f8f8f8;
+    color: #404040;
+  }
+
+#menu a.active {
+    background-color: #74ACDF;
+    color: #ffffff;
+  }
+
+#menu a.active:hover {
+    background: #3074a4;
+  }
+
+  .mapboxgl-popup {
+      max-width: 400px;
+      font: 14px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  }
+
+</style>
+
+<nav id="menu"></nav>
+<div id='map'></div>
+
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1Ijoia2p0aXRsb3dzb3JsaWUiLCJhIjoiY2sxejZudGF2MGJlZDNkbWZtZHZzbmRmeCJ9.beWVxMVUrwEARaCqoXO9eg';
+  var map = new mapboxgl.Map({
+    container: 'map', //HTML container ID
+    style: 'mapbox://styles/mapbox/light-v10', //style URL
+    center: [-58.5256, -34.6388], //start position (lat/long)
+    zoom: 9,
+});
+
+// --------------------------------------------------------------------------------------------------
+// Add your own data on top of the basemap
+// You can add raster data, geoJSON files, WMS dta, etc.
+map.on('load', function () {
+
+  // ORIGINS
+  // Adds the origins to the map
+   map.addLayer({
+         "id": "Travel Times",
+         "type": "circle",
+         "source": {
+           type: 'vector',
+           url: 'mapbox://kjtitlowsorlie.670ruj5d',
+         },
+         "source-layer": "origin_radio_n3_tt_all-9auufk",
+         "paint": {
+           "circle-radius":
+                ['/', ['get', 'trvtime_cbd_bsas'], 60],
+           "circle-color": [
+                'match',
+                ['get', 'COVERAGE_TYPE'],
+                'NONE', '#cbf3a5',
+                'MIN', '#f3dda5',
+                'MAJ', '#f3a5a5',
+                /* other */ '#ccc'
+           ],
+           "circle-stroke-width": 1,
+           "circle-stroke-color": [
+             'match',
+             ['get', 'COVERAGE_TYPE'],
+             'NONE', '#217109',
+             'MIN', '#b3900f',
+             'MAJ', '#8e120b',
+             /* other */ '#ccc'
+            ]
+         }
+   });
+
+
+  // Adds schools to the map
+   map.addLayer({
+         "id": "Public Schools",
+         "type": "circle",
+         "source": {
+           type: 'vector',
+           url: 'mapbox://kjtitlowsorlie.8qn1w9yg',
+         },
+         "source-layer": "destinations_schools-1vhhh5",
+         "layout": {
+             "visibility": "none"
+         },
+         "paint": {
+           "circle-radius": 1.5,
+           "circle-color": [
+                'match',
+                ['get', 'nivel'],
+                'Nivel Inicial', '#6e3dff',
+                'Nivel Primario', '#3900e6',
+                'Nivel Secundario', '#200080',
+                /* other */ '#ccc'
+           ]
+         }
+   });
+
+ // Adds the health diagnostic centers to the map
+  map.addLayer({
+        "id": "Diagnostic Health Centers",
+        "type": "circle",
+        "source": {
+          type: 'vector',
+          url: 'mapbox://kjtitlowsorlie.bk65u8du',
+        },
+        "source-layer": "destinations_health_diagnosti-1f5bc4",
+        "layout": {
+          "visibility": "none"
+        },
+        "paint": {
+          "circle-radius": 1.5,
+          "circle-color": "#ff0000"
+        }
+  });
+
+  // Adds the hospitals
+   map.addLayer({
+         "id": "Public Hospitals",
+         "type": "circle",
+         "source": {
+           type: 'vector',
+           url: 'mapbox://kjtitlowsorlie.b91ojl8b',
+         },
+         "source-layer": "destinations_health_hospitals-ar86ee",
+         "layout": {
+           "visibility": "none"
+         },
+         "paint": {
+           "circle-radius": 2,
+           "circle-color": "#ff0000"
+         }
+   });
+
+   // Adds the urgent care centers
+    map.addLayer({
+          "id": "Urgent Care Centers",
+          "type": "circle",
+          "source": {
+            type: 'vector',
+            url: 'mapbox://kjtitlowsorlie.ai2yaxzu',
+          },
+          "source-layer": "destinations_health_pronta-9frmpu",
+          "layout": {
+            "visibility": "none"
+          },
+          "paint": {
+            "circle-radius": 1.5,
+            "circle-color": "#ff0000"
+          }
+    });
+
+ //Adds the major passenger rail stations to the map
+  map.addLayer({
+        "id": "Railway Stations",
+        "type": "circle",
+        "source": {
+          type: 'vector',
+          url: 'mapbox://kjtitlowsorlie.ck2hr20v70bl22ons6yqz7v2i-2m3e1',
+        },
+        "source-layer": "transport_rail_stations",
+        //"layout":
+        "paint": {
+          "circle-radius": 2
+        }
+  });
+
+  //Adds the CBD's of the administrative districts to the map
+  map.addLayer({
+        "id": "Department CBDs",
+        "type": "circle",
+        "source": {
+          type: 'vector',
+          url: 'mapbox://kjtitlowsorlie.0vaifh00',
+        },
+        "source-layer": "admin_adm2_amba30_cbd-b9tizs",
+        "layout": {
+           "visibility": "none"
+        },
+        "paint": {
+          "circle-radius": 4,
+          "circle-color": "#f27826"
+        }
+  });
+
+  //Adds the CBD's of Buenos Aires AMBA
+  map.addLayer({
+        "id": "Buenos Aires CBD",
+        "type": "circle",
+        "source": {
+          type: 'vector',
+          url: 'mapbox://kjtitlowsorlie.0sun1ebq',
+        },
+        "source-layer": "destinations_cbd_amba-43nl1e",
+        "layout": {
+           "visibility": "none"
+        },
+        "paint": {
+          "circle-radius": 6,
+          "circle-color": "#f27826"
+        }
+  });
+
+
+
+  //Adds the asentamientos to the map.
+   map.addLayer({
+         "id": "Asentamientos",
+         "type": "fill",
+         "source": {
+           type: 'vector',
+           url: 'mapbox://kjtitlowsorlie.3kqkd08u',
+         },
+         "source-layer": "techo_amba30_asent-8fr5iw",
+         //"layout":
+         "paint": {
+           "fill-opacity": 0.2,
+           "fill-color": "#258712"
+         }
+   });
+
+
+
+   //Adds the major passenger rail lines to the map
+    map.addLayer({
+          "id": "Railway Lines",
+          "type": "line",
+          "source": {
+            type: 'vector',
+            url: 'mapbox://kjtitlowsorlie.04rgotuk',
+          },
+          "source-layer": "transport_amba24_rail-bb81bc"//,
+          //"layout":
+          //"paint": {
+          //  "circle-radius": 3
+          //}
+    });
+
+
+
+  //Adds the three study districts to the map
+   map.addLayer({
+         "id": "Census Radios",
+         "type": "fill",
+         "source": {
+           type: 'vector',
+           url: 'mapbox://kjtitlowsorlie.4z51ae0v',
+         },
+         "source-layer": "indec_n3_radio-bsembm",
+         //"layout":
+         "paint": {
+           "fill-opacity": 0.1,
+           //"fill-color": "#FFFFFF",
+           "fill-outline-color": "#000000"
+         }
+   });
+
+   //Adds the three study districts to the map
+    map.addLayer({
+          "id": "Study Departments",
+          "type": "fill",
+          "source": {
+            type: 'vector',
+            url: 'mapbox://kjtitlowsorlie.5vk5qww6',
+          },
+          "source-layer": "admin_adm2_n3-4ryv1b",
+          //"layout":
+          "paint": {
+            "fill-opacity": 0.1,
+            //"fill-color": "#FFFFFF",
+            "fill-outline-color": "#000000"
+          }
+    });
+
+ //Adds the administrative districts to the map
+  map.addLayer({
+        "id": "Departments",
+        "type": "fill",
+        "source": {
+          type: 'vector',
+          url: 'mapbox://kjtitlowsorlie.d43g0qwy',
+        },
+        "source-layer": "admin_adm2_amba30-47m61p",
+        //"layout":
+        "paint": {
+          "fill-opacity": 0.05
+        }
+  });
+});
+
+// --------------------------------------------------------------------------------------------------
+var toggleableLayerIds = [ 'Travel Times',
+                           'Buenos Aires CBD',
+                           'Department CBDs',
+                           'Railway Stations',
+                           'Public Hospitals',
+                           'Diagnostic Health Centers',
+                           'Urgent Care Centers',
+                           'Public Schools' ];
+
+for (var i = 0; i < toggleableLayerIds.length; i++) {
+  var id = toggleableLayerIds[i];
+
+  var link = document.createElement('a');
+  link.href = '#';
+  link.className = 'active';
+  link.textContent = id;
+
+  link.onclick = function (e) {
+    var clickedLayer = this.textContent;
+    e.preventDefault();
+    e.stopPropagation();
+
+    var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
+
+    if (visibility === 'visible') {
+    map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+    this.className = '';
+    } else {
+    this.className = 'active';
+    map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+    }
+  };
+
+  var layers = document.getElementById('menu');
+  layers.appendChild(link);
+}
+
+
+// --------------------------------------------------------------------------------------------------
+// When a click event occurs on a feature in the states layer, open a popup at the
+// location of the click, with description HTML from its properties.
+map.on('click', 'Travel Times', function(e) {
+new mapboxgl.Popup()
+.setLngLat(e.lngLat)
+.setHTML(e.features[0].properties.CODIGO_TXT)
+.addTo(map);
+});
+
+// Change the cursor to a pointer when the mouse is over the states layer.
+map.on('mouseenter', 'Travel Times', function() {
+map.getCanvas().style.cursor = 'pointer';
+});
+
+// Change it back to a pointer when it leaves.
+map.on('mouseleave', 'Travel Times', function() {
+map.getCanvas().style.cursor = '';
+});
+
+</script>
+</body>
+</html>
