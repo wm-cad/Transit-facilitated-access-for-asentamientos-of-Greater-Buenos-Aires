@@ -31,7 +31,7 @@
     display: block;
     margin: 0;
     padding: 0;
-    padding: 10px;
+    padding: 5px;
     text-decoration: none;
     border-bottom: 1px solid rgba(0,0,0,0.25);
     text-align: left;
@@ -55,15 +55,49 @@
     background: #3074a4;
   }
 
-  .mapboxgl-popup {
+#popup .mapboxgl-popup {
       max-width: 400px;
       font: 14px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  }
+
+  .legend {
+  background-color: #fff;
+  border-radius: 3px;
+  bottom: 30px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font: 12px/18px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  padding: 5px;
+  position: absolute;
+  left: 10px;
+  z-index: 1;
+  }
+
+  .legend h4 {
+  margin: 0 0 10px;
+  }
+
+  .legend div span {
+  border-radius: 50%;
+  display: inline-block;
+  height: 10px;
+  margin-right: 5px;
+  width: 10px;
   }
 
 </style>
 
 <nav id="menu"></nav>
+
 <div id='map'></div>
+
+<div id="asent-legend" class="legend">
+<h2>Legend</h2>
+<h3>Origins</h3>
+<div><span style="background-color: #00a1ff"></span>Asentamientos</div>
+<h3>Destinations</h3>
+<div><span style="background-color: #f27826"></span>Central Business Districts</div>
+<h3>Travel Times</h3>
+</div>
 
 <script>
   mapboxgl.accessToken = 'pk.eyJ1Ijoia2p0aXRsb3dzb3JsaWUiLCJhIjoiY2sxejZudGF2MGJlZDNkbWZtZHZzbmRmeCJ9.beWVxMVUrwEARaCqoXO9eg';
@@ -256,8 +290,8 @@ map.on('load', function () {
          "source-layer": "techo_amba30_asent-8fr5iw",
          //"layout":
          "paint": {
-           "fill-opacity": 0.2,
-           "fill-color": "#258712"
+           "fill-opacity": 0.3,
+           "fill-color": "#00a1ff"
          }
    });
 
@@ -331,8 +365,8 @@ map.on('load', function () {
 });
 
 // --------------------------------------------------------------------------------------------------
-var toggleableLayerIds = [ 'Travel Times',
-                           'Buenos Aires CBD',
+// Allow layers to be toggled on and off
+var toggleableLayerIds = [ 'Buenos Aires CBD',
                            'Department CBDs',
                            'Railway Stations',
                            'Public Hospitals',
@@ -387,6 +421,15 @@ map.getCanvas().style.cursor = 'pointer';
 // Change it back to a pointer when it leaves.
 map.on('mouseleave', 'Travel Times', function() {
 map.getCanvas().style.cursor = '';
+});
+
+// -------------------------------------------------------------------------------------------------
+// Add a legend to the map
+var asentLegend = document.getElementById('legend-asent');
+map.on('zoom', function() {
+  if (map.getZoom() < 0) {
+    asentLegend.style.display = 'block';
+  }
 });
 
 </script>
