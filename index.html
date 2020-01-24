@@ -1,39 +1,39 @@
 <html>
 <head>
   <meta charset='utf-8' />
-  <title>Asentamientos in Buenos Aires, Argentina</title>
+  <title>De Alguna Manera Llegas</title>
   <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
   <script src='https://api.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.js'></script>
   <link href='https://api.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.css' rel='stylesheet' />
   <style>
-    body { margin:0; padding:0; }
-    #map { position:absolute; top:0; bottom:0; width:100%; }
+    body { margin:0; padding:10; }
   </style>
 </head>
-<body>
 
+<body>
 <style>
+
   #menu {
     background: #fff;
     position: absolute;
     z-index: 1;
-    top: 10px;
-    right: 10px;
+    top: 15px;
+    right: 15px;
     border-radius: 4px;
-    width: 200px;
-    border: 2px solid rgba(0,0,0,0.4);
+    width: 220px;
+    border: 3px solid rgba(0,16,51,1);
     font-family: 'Open Sans', sans-serif;
   }
 
 #menu a {
     font-size: 14px;
-    color: #404040;
+    color: #000000;
     display: block;
     margin: 0;
     padding: 0;
-    padding: 5px;
+    padding: 6px;
     text-decoration: none;
-    border-bottom: 1px solid rgba(0,0,0,0.25);
+    border-bottom: 1px solid rgba(0,32,102,1);
     text-align: left;
   }
 
@@ -55,16 +55,17 @@
     background: #3074a4;
   }
 
+
 #popup .mapboxgl-popup {
       max-width: 400px;
       font: 14px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
   }
 
   .legend {
-  background-color: #fff;
+  background-color: #ffffff;
   border-radius: 3px;
   bottom: 30px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 1);
   font: 12px/18px 'Helvetica Neue', Arial, Helvetica, sans-serif;
   padding: 5px;
   position: absolute;
@@ -73,30 +74,37 @@
   }
 
   .legend h4 {
-  margin: 0 0 10px;
+  margin: 0 0 5px;
   }
 
   .legend div span {
-  border-radius: 50%;
+  border-radius: 40%;
   display: inline-block;
   height: 10px;
-  margin-right: 5px;
+  margin-right: 10px;
+  font-size: 12px;
   width: 10px;
   }
 
 </style>
 
-<nav id="menu"></nav>
-
-<div id='map'></div>
+<div id="menu" class="menu"></div>
 
 <div id="asent-legend" class="legend">
-<h2>Legend</h2>
-<h3>Origins</h3>
-<div><span style="background-color: #00a1ff"></span>Asentamientos</div>
-<h3>Destinations</h3>
-<div><span style="background-color: #f27826"></span>Central Business Districts</div>
-<h3>Travel Times</h3>
+  <h3>Origins</h3>
+  <div><span style="background-color: #00a1ff"></span>Asentamientos</div>
+  <h3>Destinations</h3>
+  <div><span style="background-color: #f27826"></span>Central Business Districts</div>
+  <div><span style="background-color: #ff0000"></span>Public Healthcare</div>
+  <h3>Travel Times</h3>
+  <div><span style="background-color: #cbf3a5"></span>No asentamiento</div>
+  <div><span style="background-color: #f3dda5"></span>Possible asentamiento</div>
+  <div><span style="background-color: #f3a5a5"></span>Likely asentamiento</div>
+</div>
+
+<div id='map' class="map" style='height:100%; width:100%;'>
+<h1>De alguna manera llegas</h1>
+<h3>Transit access to the asentamientos of greater Buenos Aires, Argentina</h3>
 </div>
 
 <script>
@@ -104,7 +112,7 @@
   var map = new mapboxgl.Map({
     container: 'map', //HTML container ID
     style: 'mapbox://styles/mapbox/light-v10', //style URL
-    center: [-58.5256, -34.6388], //start position (lat/long)
+    center: [-58.5256, -34.6588], //start position (lat/long)
     zoom: 9,
 });
 
@@ -113,16 +121,20 @@
 // You can add raster data, geoJSON files, WMS dta, etc.
 map.on('load', function () {
 
-  // ORIGINS
-  // Adds the origins to the map
+  // ORIGINS ---------------------------------------------------------
+  // Adds the Buenos Aires CBD travel times to the map
    map.addLayer({
-         "id": "Travel Times",
+         "id": "TT: BsAs CBD, Zout",
          "type": "circle",
          "source": {
            type: 'vector',
            url: 'mapbox://kjtitlowsorlie.670ruj5d',
          },
          "source-layer": "origin_radio_n3_tt_all-9auufk",
+         "layout": {
+             "visibility": "none"
+         },
+         "maxzoom": 12,
          "paint": {
            "circle-radius":
                 ['/', ['get', 'trvtime_cbd_bsas'], 60],
@@ -146,7 +158,77 @@ map.on('load', function () {
          }
    });
 
+   map.addLayer({
+         "id": "TT: BsAs CBD, Zin",
+         "type": "circle",
+         "source": {
+           type: 'vector',
+           url: 'mapbox://kjtitlowsorlie.670ruj5d',
+         },
+         "source-layer": "origin_radio_n3_tt_all-9auufk",
+         "layout": {
+             "visibility": "none"
+         },
+         "minzoom": 12,
+         "paint": {
+           "circle-radius":
+                ['/', ['get', 'trvtime_cbd_bsas'], 15],
+           "circle-color": [
+                'match',
+                ['get', 'COVERAGE_TYPE'],
+                'NONE', '#cbf3a5',
+                'MIN', '#f3dda5',
+                'MAJ', '#f3a5a5',
+                /* other */ '#ccc'
+           ],
+           "circle-stroke-width": 1,
+           "circle-stroke-color": [
+             'match',
+             ['get', 'COVERAGE_TYPE'],
+             'NONE', '#217109',
+             'MIN', '#b3900f',
+             'MAJ', '#8e120b',
+             /* other */ '#ccc'
+            ]
+         }
+   });
 
+   // Adds the Departmental CBD travel times to the map
+    map.addLayer({
+          "id": "Travel Times: Departmental CBD",
+          "type": "circle",
+          "source": {
+            type: 'vector',
+            url: 'mapbox://kjtitlowsorlie.670ruj5d',
+          },
+          "source-layer": "origin_radio_n3_tt_all-9auufk",
+          "layout": {
+              "visibility": "none"
+          },
+          "paint": {
+            "circle-radius":
+                 ['/', ['get', 'trvtime_cbd_loc'], 60],
+            "circle-color": [
+                 'match',
+                 ['get', 'COVERAGE_TYPE'],
+                 'NONE', '#cbf3a5',
+                 'MIN', '#f3dda5',
+                 'MAJ', '#f3a5a5',
+                 /* other */ '#ccc'
+            ],
+            "circle-stroke-width": 1,
+            "circle-stroke-color": [
+              'match',
+              ['get', 'COVERAGE_TYPE'],
+              'NONE', '#217109',
+              'MIN', '#b3900f',
+              'MAJ', '#8e120b',
+              /* other */ '#ccc'
+             ]
+          }
+    });
+
+  // DESTINATIONS --------------------------------------------------------------------------------------
   // Adds schools to the map
    map.addLayer({
          "id": "Public Schools",
@@ -199,6 +281,7 @@ map.on('load', function () {
            url: 'mapbox://kjtitlowsorlie.b91ojl8b',
          },
          "source-layer": "destinations_health_hospitals-ar86ee",
+         'filter': ["!=", "provincia", "CABA"],
          "layout": {
            "visibility": "none"
          },
@@ -243,7 +326,7 @@ map.on('load', function () {
 
   //Adds the CBD's of the administrative districts to the map
   map.addLayer({
-        "id": "Department CBDs",
+        "id": "Departmental CBDs",
         "type": "circle",
         "source": {
           type: 'vector',
@@ -365,48 +448,67 @@ map.on('load', function () {
 });
 
 // --------------------------------------------------------------------------------------------------
-// Allow layers to be toggled on and off
-var toggleableLayerIds = [ 'Buenos Aires CBD',
-                           'Department CBDs',
-                           'Railway Stations',
-                           'Public Hospitals',
-                           'Diagnostic Health Centers',
-                           'Urgent Care Centers',
-                           'Public Schools' ];
+// Adds the Buenos Aires CBD travel times and feature to the map
+var toggleableLayerIds1 = [ 'Buenos Aires CBD', 'TT: BsAs CBD, Zout', 'TT: BsAs CBD, Zin' ];
 
-for (var i = 0; i < toggleableLayerIds.length; i++) {
-  var id = toggleableLayerIds[i];
+var link = document.createElement('a');
+link.href = '#';
+link.className = 'active';
+link.textContent = "Buenos Aires CBD";
+link.onclick = function (e) {
+    for(var index in toggleableLayerIds1) {
+      var clickedLayer = toggleableLayerIds1[index];
+      e.preventDefault();
+      e.stopPropagation();
 
-  var link = document.createElement('a');
-  link.href = '#';
-  link.className = 'active';
-  link.textContent = id;
+      var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
 
-  link.onclick = function (e) {
-    var clickedLayer = this.textContent;
-    e.preventDefault();
-    e.stopPropagation();
-
-    var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
-
-    if (visibility === 'visible') {
-    map.setLayoutProperty(clickedLayer, 'visibility', 'none');
-    this.className = '';
-    } else {
-    this.className = 'active';
-    map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+      if (visibility === 'visible') {
+          map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+          this.className = '';
+      } else {
+          this.className = 'active';
+          map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+      }
     }
-  };
 
-  var layers = document.getElementById('menu');
-  layers.appendChild(link);
-}
+};
+
+// Adds the Departmental CBD travel times and features to the map
+var toggleableLayerIds2 = [ 'Departmental CBDs', 'Travel Times: Departmental CBD' ];
+
+var link2 = document.createElement('a');
+link2.href = '#';
+link2.className = 'active';
+link2.textContent = "Departmental CBDs";
+link2.onclick = function (e) {
+    for(var index2 in toggleableLayerIds2) {
+      var clickedLayer2 = toggleableLayerIds2[index2];
+      e.preventDefault();
+      e.stopPropagation();
+
+      var visibility2 = map.getLayoutProperty(clickedLayer2, 'visibility');
+
+      if (visibility2 === 'visible') {
+          map.setLayoutProperty(clickedLayer2, 'visibility', 'none');
+          this.className = '';
+      } else {
+          this.className = 'active';
+          map.setLayoutProperty(clickedLayer2, 'visibility', 'visible');
+      }
+    }
+
+};
+
+var layers = document.getElementById('menu');
+layers.appendChild(link);
+layers.appendChild(link2);
 
 
 // --------------------------------------------------------------------------------------------------
 // When a click event occurs on a feature in the states layer, open a popup at the
 // location of the click, with description HTML from its properties.
-map.on('click', 'Travel Times', function(e) {
+map.on('click', 'TT: BsAs CBD, Zout', function(e) {
 new mapboxgl.Popup()
 .setLngLat(e.lngLat)
 .setHTML(e.features[0].properties.CODIGO_TXT)
@@ -414,12 +516,12 @@ new mapboxgl.Popup()
 });
 
 // Change the cursor to a pointer when the mouse is over the states layer.
-map.on('mouseenter', 'Travel Times', function() {
+map.on('mouseenter', 'TT: BsAs CBD, Zout', function() {
 map.getCanvas().style.cursor = 'pointer';
 });
 
 // Change it back to a pointer when it leaves.
-map.on('mouseleave', 'Travel Times', function() {
+map.on('mouseleave', 'TT: BsAs CBD, Zout', function() {
 map.getCanvas().style.cursor = '';
 });
 
