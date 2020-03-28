@@ -13,14 +13,15 @@
 <body>
 <style>
 
+/* This controls the menu for selecting layers on and off */
   #menu {
     background: #fff;
     position: absolute;
     z-index: 1;
     top: 15px;
-    right: 15px;
+    right: 30px;
     border-radius: 4px;
-    width: 220px;
+    width: 250px;
     border: 3px solid rgba(0,16,51,1);
     font-family: 'Open Sans', sans-serif;
   }
@@ -61,26 +62,29 @@
       font: 14px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
   }
 
+/* This controls the size and location of the legend */
   .legend {
   background-color: #ffffff;
   border-radius: 3px;
-  bottom: 30px;
+  bottom: 20px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 1);
   font: 12px/18px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-  padding: 5px;
+  padding: 15px;
   position: absolute;
-  left: 10px;
+  left: 20px;
   z-index: 1;
   }
 
-  .legend h4 {
-  margin: 0 0 5px;
+  .legend h3 {
+  margin: 5 0 5px;
+  font-size: 14px;
   }
 
+  /*This controls the small icons in the legend*/
   .legend div span {
   border-radius: 40%;
   display: inline-block;
-  height: 10px;
+  height: 8px;
   margin-right: 10px;
   font-size: 12px;
   width: 10px;
@@ -89,13 +93,15 @@
 </style>
 
 <div id="menu" class="menu"></div>
-
 <div id="asent-legend" class="legend">
   <h3>Origins</h3>
   <div><span style="background-color: #00a1ff"></span>Asentamientos</div>
+  <div><span style="background-color: gray"></span>Sampled census radios</div>
   <h3>Destinations</h3>
-  <div><span style="background-color: #f27826"></span>Central Business Districts</div>
+  <div><span style="background-color: gold"></span>City/department centers</div>
+  <div><span style="background-color: black"></span>Railway Stations</div>
   <div><span style="background-color: #ff0000"></span>Public Healthcare</div>
+  <div><span style="background-color: green"></span>Public Schools</div>
   <h3>Travel Times</h3>
   <div><span style="background-color: #cbf3a5"></span>No asentamiento</div>
   <div><span style="background-color: #f3dda5"></span>Possible asentamiento</div>
@@ -104,7 +110,7 @@
 
 <div id='map' class="map" style='height:100%; width:100%;'>
 <h1>De alguna manera llegas</h1>
-<h3>Measuring public transportation-facilitated access from the asentamientos of greater Buenos Aires, Argentina</h3>
+<h3>Relative public transportation-facilitated access of the asentamientos of greater Buenos Aires, Argentina (2018)</h3>
 </div>
 
 <script>
@@ -138,7 +144,7 @@ map.on('load', function () {
          "maxzoom": 11,
          "paint": {
            "circle-radius":
-                ['/', ['get', 'trvtime_cbd_bsas'], 60],
+                ['/', ['get', 'trvtime_cbd_bsas'], 30],
            "circle-color": [
                 'match',
                 ['get', 'COVERAGE_TYPE'],
@@ -195,7 +201,7 @@ map.on('load', function () {
    });
 
    // Adds the Departmental CBD travel times to the map
-    map.addLayer({
+  map.addLayer({
           "id": "TT: Dept CBD, Zout",
           "type": "circle",
           "source": {
@@ -230,7 +236,7 @@ map.on('load', function () {
           }
     });
 
-     map.addLayer({
+  map.addLayer({
            "id": "TT: Dept CBD, Zin",
            "type": "circle",
            "source": {
@@ -266,9 +272,9 @@ map.on('load', function () {
      });
 
   // DESTINATIONS --------------------------------------------------------------------------------------
-  // Adds schools to the map
+  // Adds kindergartens the map
    map.addLayer({
-         "id": "Public Schools",
+         "id": "Public Kindergartens",
          "type": "circle",
          "source": {
            type: 'vector',
@@ -278,8 +284,9 @@ map.on('load', function () {
          "layout": {
              "visibility": "none"
          },
+         "filter": ["==", "nivel", 'Nivel Inicial'],
          "paint": {
-           "circle-radius": 1.5,
+           "circle-radius": 2,
            "circle-color": [
                 'match',
                 ['get', 'nivel'],
@@ -290,6 +297,60 @@ map.on('load', function () {
            ]
          }
    });
+
+   // Adds primary schools to the map
+    map.addLayer({
+          "id": "Public Primary Schools",
+          "type": "circle",
+          "source": {
+            type: 'vector',
+            url: 'mapbox://kjtitlowsorlie.8qn1w9yg',
+          },
+          "source-layer": "destinations_schools-1vhhh5",
+          "layout": {
+              "visibility": "none"
+          },
+          "filter": ["==", "nivel", 'Nivel Primario'],
+          "paint": {
+            "circle-radius": 2,
+            "circle-color": [
+                 'match',
+                 ['get', 'nivel'],
+                 'Nivel Inicial', '#6e3dff',
+                 'Nivel Primario', '#3900e6',
+                 'Nivel Secundario', '#200080',
+                 /* other */ '#ccc'
+            ]
+          }
+    });
+
+
+       // Adds primary schools to the map
+     map.addLayer({
+              "id": "Public Secondary Schools",
+              "type": "circle",
+              "source": {
+                type: 'vector',
+                url: 'mapbox://kjtitlowsorlie.8qn1w9yg',
+              },
+              "source-layer": "destinations_schools-1vhhh5",
+              "layout": {
+                  "visibility": "none"
+              },
+              "filter": ["==", "nivel", 'Nivel Secundario'],
+              "paint": {
+                "circle-radius": 2,
+                "circle-color": [
+                     'match',
+                     ['get', 'nivel'],
+                     'Nivel Inicial', '#6e3dff',
+                     'Nivel Primario', '#3900e6',
+                     'Nivel Secundario', '#200080',
+                     /* other */ '#ccc'
+                ]
+              }
+        });
+
 
  // Adds the health diagnostic centers to the map
   map.addLayer({
@@ -304,7 +365,7 @@ map.on('load', function () {
           "visibility": "none"
         },
         "paint": {
-          "circle-radius": 1.5,
+          "circle-radius": 2.5,
           "circle-color": "#ff0000"
         }
   });
@@ -323,7 +384,7 @@ map.on('load', function () {
            "visibility": "none"
          },
          "paint": {
-           "circle-radius": 2,
+           "circle-radius": 2.5,
            "circle-color": "#ff0000"
          }
    });
@@ -341,10 +402,11 @@ map.on('load', function () {
             "visibility": "none"
           },
           "paint": {
-            "circle-radius": 1.5,
+            "circle-radius": 2.5,
             "circle-color": "#ff0000"
           }
     });
+
 
  //Adds the major passenger rail stations to the map
   map.addLayer({
@@ -361,23 +423,87 @@ map.on('load', function () {
         }
   });
 
+
   //Adds the CBD's of the administrative districts to the map
   map.addLayer({
-        "id": "Departmental CBDs",
+        "id": "Proximate CBDs",
         "type": "circle",
         "source": {
           type: 'vector',
-          url: 'mapbox://kjtitlowsorlie.0vaifh00',
+          url: 'mapbox://kjtitlowsorlie.dzh4aewp',
         },
-        "source-layer": "admin_adm2_amba30_cbd-b9tizs",
+        "source-layer": "destinations_cbd_n3_proximate-47a3a8",
         "layout": {
            "visibility": "none"
         },
         "paint": {
-          "circle-radius": 4,
-          "circle-color": "#f27826"
+          "circle-radius": 5,
+          "circle-color": "#deb72a",
+          'circle-stroke-color': '#7d6614',
+          'circle-stroke-width': 1,
         }
   });
+
+  //Adds the CBD's of Quilmes
+  map.addLayer({
+        "id": "Pilar CBD",
+        "type": "circle",
+        "source": {
+          type: 'vector',
+          url: 'mapbox://kjtitlowsorlie.agl0ofae',
+        },
+        "source-layer": "destinations_cbd_n3_pilar-d5nb3e",
+        "layout": {
+           "visibility": "none"
+        },
+        "paint": {
+          "circle-radius": 6,
+          "circle-color": "#deb72a",
+          'circle-stroke-color': '#7d6614',
+          'circle-stroke-width': 1,
+        }
+  });
+
+  //Adds the CBD's of La Matanza
+  map.addLayer({
+        "id": "La Matanza CBD",
+        "type": "circle",
+        "source": {
+          type: 'vector',
+          url: 'mapbox://kjtitlowsorlie.d1w0pjta',
+        },
+        "source-layer": "destinations_cbd_n3_lamatanza-6petqm",
+        "layout": {
+           "visibility": "none"
+        },
+        "paint": {
+          "circle-radius": 6,
+          "circle-color": "#deb72a",
+          'circle-stroke-color': '#7d6614',
+          'circle-stroke-width': 1,
+        }
+  });
+
+  //Adds the CBD's of Quilmes
+  map.addLayer({
+        "id": "Quilmes CBD",
+        "type": "circle",
+        "source": {
+          type: 'vector',
+          url: 'mapbox://kjtitlowsorlie.29oi0mt7',
+        },
+        "source-layer": "destinations_cbd_n3_quilmes-09rt2h",
+        "layout": {
+           "visibility": "none"
+        },
+        "paint": {
+          "circle-radius": 6,
+          "circle-color": "#deb72a",
+          'circle-stroke-color': '#7d6614',
+          'circle-stroke-width': 1,
+        }
+  });
+
 
   //Adds the CBD's of Buenos Aires AMBA
   map.addLayer({
@@ -393,9 +519,12 @@ map.on('load', function () {
         },
         "paint": {
           "circle-radius": 6,
-          "circle-color": "#f27826"
+          "circle-color": "#deb72a",
+          'circle-stroke-color': '#7d6614',
+          'circle-stroke-width': 1,
         }
   });
+
 
 
 
@@ -417,6 +546,7 @@ map.on('load', function () {
 
 
 
+
    //Adds the major passenger rail lines to the map
     map.addLayer({
           "id": "Railway Lines",
@@ -434,7 +564,25 @@ map.on('load', function () {
 
 
 
-  //Adds the three study districts to the map
+    //Adds the census radios selected for travel time analysis
+     map.addLayer({
+           "id": "Census Radios Selected",
+           "type": "fill",
+           "source": {
+             type: 'vector',
+             url: 'mapbox://kjtitlowsorlie.206j3dn1',
+           },
+           "source-layer": "origin_radio_n3_INDEC-1w4x8m",
+           //"layout":
+           "minzoom": 11,
+           "paint": {
+             "fill-opacity": 0.1,
+             //"fill-color": "#FFFFFF",
+             "fill-outline-color": "black"
+           }
+     });
+
+  //Adds the census radios from the three study departments to the map
    map.addLayer({
          "id": "Census Radios",
          "type": "fill",
@@ -444,12 +592,15 @@ map.on('load', function () {
          },
          "source-layer": "indec_n3_radio-bsembm",
          //"layout":
+         "minzoom": 11,
          "paint": {
            "fill-opacity": 0.1,
            //"fill-color": "#FFFFFF",
            "fill-outline-color": "#000000"
          }
    });
+
+
 
    //Adds the three study districts to the map
     map.addLayer({
@@ -461,12 +612,28 @@ map.on('load', function () {
           },
           "source-layer": "admin_adm2_n3-4ryv1b",
           //"layout":
+          "maxzoom": 11,
           "paint": {
             "fill-opacity": 0.1,
             //"fill-color": "#FFFFFF",
             "fill-outline-color": "#000000"
           }
     });
+
+    //Adds the  mancha urbana to the map
+     map.addLayer({
+           "id": "Mancha Urbana",
+           "type": "fill",
+           "source": {
+             type: 'vector',
+             url: 'mapbox://kjtitlowsorlie.1a772bi3',
+           },
+           "source-layer": "urban_amba_manchaurbana-9etucc",
+           //"layout":
+           "paint": {
+             "fill-opacity": 0.025
+           }
+     });
 
  //Adds the administrative districts to the map
   map.addLayer({
@@ -478,6 +645,7 @@ map.on('load', function () {
         },
         "source-layer": "admin_adm2_amba30-47m61p",
         //"layout":
+        "maxzoom": 11,
         "paint": {
           "fill-opacity": 0.05
         }
@@ -491,7 +659,7 @@ var toggleableLayerIds1 = [ 'Buenos Aires CBD', 'TT: BsAs CBD, Zout', 'TT: BsAs 
 var link = document.createElement('a');
 link.href = '#';
 link.className = 'active';
-link.textContent = "Buenos Aires CBD";
+link.textContent = "City center of Buenos Aires";
 link.onclick = function (e) {
     for(var index in toggleableLayerIds1) {
       var clickedLayer = toggleableLayerIds1[index];
@@ -512,12 +680,12 @@ link.onclick = function (e) {
 };
 
 // Adds the Departmental CBD travel times and features to the map
-var toggleableLayerIds2 = [ 'Departmental CBDs', 'TT: Dept CBD, Zout', 'TT: Dept CBD, Zin' ];
+var toggleableLayerIds2 = [ 'Quilmes CBD', 'La Matanza CBD', 'Pilar CBD', 'TT: Dept CBD, Zout', 'TT: Dept CBD, Zin' ];
 
 var link2 = document.createElement('a');
 link2.href = '#';
 link2.className = 'active';
-link2.textContent = "Departmental CBDs";
+link2.textContent = "City center of radio's department";
 link2.onclick = function (e) {
     for(var index2 in toggleableLayerIds2) {
       var clickedLayer2 = toggleableLayerIds2[index2];
@@ -537,10 +705,145 @@ link2.onclick = function (e) {
 
 };
 
+// Adds the proximate CBD's layer to the map
+var toggleableLayerIds3 = [ 'Proximate CBDs', 'Pilar CBD', 'La Matanza CBD', 'Quilmes CBD'];
+
+var link3 = document.createElement('a');
+link3.href = '#';
+link3.className = 'active';
+link3.textContent = "City center of any department";
+link3.onclick = function (e) {
+    for(var index3 in toggleableLayerIds3) {
+      var clickedLayer3 = toggleableLayerIds3[index3];
+      e.preventDefault();
+      e.stopPropagation();
+
+      var visibility3 = map.getLayoutProperty(clickedLayer3, 'visibility');
+
+      if (visibility3 === 'visible') {
+          map.setLayoutProperty(clickedLayer3, 'visibility', 'none');
+          this.className = '';
+      } else {
+          this.className = 'active';
+          map.setLayoutProperty(clickedLayer3, 'visibility', 'visible');
+      }
+    }
+
+};
+
+// Adds the railway stations to the map
+var toggleableLayerIds4 = [ 'Railway Stations'];
+
+var link4 = document.createElement('a');
+link4.href = '#';
+link4.className = 'active';
+link4.textContent = "Railway station";
+link4.onclick = function (e) {
+    for(var index4 in toggleableLayerIds4) {
+      var clickedLayer4 = toggleableLayerIds4[index4];
+      e.preventDefault();
+      e.stopPropagation();
+
+      var visibility4 = map.getLayoutProperty(clickedLayer4, 'visibility');
+
+      if (visibility4 === 'visible') {
+          map.setLayoutProperty(clickedLayer4, 'visibility', 'none');
+          this.className = '';
+      } else {
+          this.className = 'active';
+          map.setLayoutProperty(clickedLayer4, 'visibility', 'visible');
+      }
+    }
+
+};
+
+// Adds the public diagnostic centers to the map
+var toggleableLayerIds5 = [ 'Diagnostic Health Centers'];
+
+var link5 = document.createElement('a');
+link5.href = '#';
+link5.className = 'active';
+link5.textContent = "Public diagnostic/treatment center";
+link5.onclick = function (e) {
+    for(var index5 in toggleableLayerIds5) {
+      var clickedLayer5 = toggleableLayerIds5[index5];
+      e.preventDefault();
+      e.stopPropagation();
+
+      var visibility5 = map.getLayoutProperty(clickedLayer5, 'visibility');
+
+      if (visibility5 === 'visible') {
+          map.setLayoutProperty(clickedLayer5, 'visibility', 'none');
+          this.className = '';
+      } else {
+          this.className = 'active';
+          map.setLayoutProperty(clickedLayer5, 'visibility', 'visible');
+      }
+    }
+
+};
+
+// Adds the public hospitals to the map
+var toggleableLayerIds6 = [ 'Public Hospitals'];
+
+var link6 = document.createElement('a');
+link6.href = '#';
+link6.className = 'active';
+link6.textContent = "Public hospitals";
+link6.onclick = function (e) {
+    for(var index6 in toggleableLayerIds6) {
+      var clickedLayer6 = toggleableLayerIds6[index6];
+      e.preventDefault();
+      e.stopPropagation();
+
+      var visibility6 = map.getLayoutProperty(clickedLayer6, 'visibility');
+
+      if (visibility6 === 'visible') {
+          map.setLayoutProperty(clickedLayer6, 'visibility', 'none');
+          this.className = '';
+      } else {
+          this.className = 'active';
+          map.setLayoutProperty(clickedLayer6, 'visibility', 'visible');
+      }
+    }
+
+};
+
+// Adds the public urgent care centers to the map
+var toggleableLayerIds7 = [ 'Urgent Care Centers'];
+
+var link7 = document.createElement('a');
+link7.href = '#';
+link7.className = 'active';
+link7.textContent = "Public urgent care centers";
+link7.onclick = function (e) {
+    for(var index7 in toggleableLayerIds7) {
+      var clickedLayer7 = toggleableLayerIds7[index7];
+      e.preventDefault();
+      e.stopPropagation();
+
+      var visibility7 = map.getLayoutProperty(clickedLayer7, 'visibility');
+
+      if (visibility7 === 'visible') {
+          map.setLayoutProperty(clickedLayer7, 'visibility', 'none');
+          this.className = '';
+      } else {
+          this.className = 'active';
+          map.setLayoutProperty(clickedLayer7, 'visibility', 'visible');
+      }
+    }
+
+};
+
+
 var layers = document.getElementById('menu');
 layers.appendChild(link);
 layers.appendChild(link2);
-
+layers.appendChild(link3);
+layers.appendChild(link4);
+layers.appendChild(link5);
+layers.appendChild(link6);
+layers.appendChild(link7);
 
 // --------------------------------------------------------------------------------------------------
 // When a click event occurs on a feature in the states layer, open a popup at the
