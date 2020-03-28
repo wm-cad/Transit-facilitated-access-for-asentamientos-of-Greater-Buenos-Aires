@@ -13,53 +13,75 @@
 <body>
 <style>
 
+/* This controls styling for the map elements */
+.map {
+  background-color: #8BBAD8;
+  color: black;
+  border: 2px solid black;
+  padding:0px
+}
+
+.map h1 {
+  margin: 20 10 15px;
+  font-size: 30px;
+}
+
+.map p {
+  margin: 10 10 15px;
+  font-size: 16px;
+}
+
 /* This controls the menu for selecting layers on and off */
 .menu {
-    background: #fff;
+    background: #232323;
     position: absolute;
     z-index: 1;
-    top: 30px;
-    right: 30px;
-    border-radius: 4px;
+    top: 25px;
+    right: 40px;
+    border-radius: 2px;
     width: 250px;
-    border: 4px solid rgba(0,16,51,1);
+    border: 3px solid black;
     font-family: 'Open Sans', sans-serif;
   }
 
+.menu h3 {
+      color: #8BBAD8;
+      margin: 10 5 5px;
+    }
+
+.menu p {
+      color: #E8E8E8;
+      font-size: 14px;
+      margin: 10 5 5px;
+    }
+
 .menu a {
     font-size: 14px;
+    /* font color of layer menu */
     color: #000000;
+    background-color: #F5F9FD;
+    //border: 1px solid navy;
     display: block;
     margin: 0;
     padding: 0;
-    padding: 6px;
+    padding: 5px;
     text-decoration: none;
-    border-bottom: 1px solid rgba(0,32,102,1);
-    text-align: left;
-  }
-
-.menu h3 {
-    color: navy;
-    margin: 5 5 5px;
-  }
-
-.menu p {
-    color: black;
-    font-size: 14px;
-    margin: 5 5 5px;
+    border-top: 1px solid black;
+    /*border-bottom: 1px solid black;*/
+    text-align: center;
   }
 
 .menu a:last-child {
-    border: none;
+    border-top: 1px solid black;
   }
 
 .menu a:hover {
-    background-color: #f8f8f8;
+    background-color: #BAD8F2;
     color: #404040;
   }
 
 .menu a.active {
-    background-color: #74ACDF;
+    background-color: #5B94C0;
     color: #ffffff;
   }
 
@@ -74,39 +96,46 @@
   }
 
 /* This controls the size and location of the legend */
-  .legend {
-  background-color: #ffffff;
-  border-radius: 3px;
-  bottom: 20px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 1);
+.legend {
+  background-color: #232323;
+  border-radius: 2px;
   font: 12px/18px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  color: #E8E8E8;
+  /*box-shadow: 0 1px 2px rgba(0, 0, 0, 1);*/
   padding: 15px;
   position: absolute;
-  left: 20px;
+  bottom: 25px;
+  left: 25px;
   z-index: 1;
+  border: 2px solid block;
   }
 
-  .legend h3 {
+.legend h3 {
   margin: 5 0 5px;
+  color: white;
   font-size: 14px;
   }
 
-  /*This controls the small icons in the legend*/
-  .legend div span {
+.legend p {
+  margin: 5 0 5px;
+  font-size: 11px;
+  color: #E8E8E8;
+  }
+
+.legend div span {
   border-radius: 40%;
   display: inline-block;
-  height: 8px;
-  margin-right: 10px;
-  font-size: 12px;
+  height: 10px;
   width: 10px;
+  margin-right: 10px;
+  /*font-size: 12px;*/
   }
 
 </style>
 
 <div id="feature-menu" class="menu">
-  <h3>Destinations</h3>
-  <p>Click on a destination to reveal the minimum travel time required to access that feature using only public transport.</p>
-  <p>Each circle corresponds to one of the sampled census radios.</p>
+  <h3>Travel Times</h3>
+  <p>Click on a destination to show the minimum public transit-based travel time to that amenity from each of the sampled census radios.</p>
 </div>
 
 <div id="asent-legend" class="legend">
@@ -119,6 +148,7 @@
   <div><span style="background-color: #ff0000"></span>Public Healthcare</div>
   <div><span style="background-color: green"></span>Public Schools</div>
   <h3>Travel Times</h3>
+  <p>Larger circle for longer travel time.</p>
   <div><span style="background-color: #cbf3a5"></span>No asentamiento</div>
   <div><span style="background-color: #f3dda5"></span>Possible asentamiento</div>
   <div><span style="background-color: #f3a5a5"></span>Likely asentamiento</div>
@@ -129,9 +159,9 @@
   </ul>
 </div>
 
-<div id='map' class="map" style='height:100%; width:100%;'>
+<div id='map' class="map" style='height:100%; width:100%'>
 <h1>De alguna manera llegas</h1>
-<h3>Relative public transportation-facilitated access of the asentamientos of greater Buenos Aires, Argentina (2018)</h3>
+<p>Relative public transportation-facilitated access of the asentamientos of greater Buenos Aires, Argentina (2018)</p>
 </div>
 
 <script>
@@ -307,15 +337,8 @@ map.on('load', function () {
          },
          "filter": ["==", "nivel", 'Nivel Inicial'],
          "paint": {
-           "circle-radius": 2,
-           "circle-color": [
-                'match',
-                ['get', 'nivel'],
-                'Nivel Inicial', '#6e3dff',
-                'Nivel Primario', '#3900e6',
-                'Nivel Secundario', '#200080',
-                /* other */ '#ccc'
-           ]
+           "circle-radius": 1.5,
+           "circle-color": "green"
          }
    });
 
@@ -677,24 +700,24 @@ map.on('load', function () {
 // Adds the Buenos Aires CBD travel times and feature to the map
 var toggleableLayerIds1 = [ 'Buenos Aires CBD', 'TT: BsAs CBD, Zout', 'TT: BsAs CBD, Zin' ];
 
-var link = document.createElement('a');
-link.href = '#';
-link.className = 'active';
-link.textContent = "City center of Buenos Aires";
-link.onclick = function (e) {
-    for(var index in toggleableLayerIds1) {
-      var clickedLayer = toggleableLayerIds1[index];
+var link1 = document.createElement('a');
+link1.href = '#';
+//link1.className = 'active';
+link1.textContent = "City center of Buenos Aires";
+link1.onclick = function (e) {
+    for(var index1 in toggleableLayerIds1) {
+      var clickedLayer1 = toggleableLayerIds1[index1];
       e.preventDefault();
       e.stopPropagation();
 
-      var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
+      var visibility1 = map.getLayoutProperty(clickedLayer1, 'visibility');
 
-      if (visibility === 'visible') {
-          map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+      if (visibility1 === 'visible') {
+          map.setLayoutProperty(clickedLayer1, 'visibility', 'none');
           this.className = '';
       } else {
           this.className = 'active';
-          map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+          map.setLayoutProperty(clickedLayer1, 'visibility', 'visible');
       }
     }
 
@@ -705,7 +728,7 @@ var toggleableLayerIds2 = [ 'Quilmes CBD', 'La Matanza CBD', 'Pilar CBD', 'TT: D
 
 var link2 = document.createElement('a');
 link2.href = '#';
-link2.className = 'active';
+//link2.className = 'active';
 link2.textContent = "City center of radio's department";
 link2.onclick = function (e) {
     for(var index2 in toggleableLayerIds2) {
@@ -731,7 +754,7 @@ var toggleableLayerIds3 = [ 'Proximate CBDs', 'Pilar CBD', 'La Matanza CBD', 'Qu
 
 var link3 = document.createElement('a');
 link3.href = '#';
-link3.className = 'active';
+//link3.className = 'active';
 link3.textContent = "City center of any department";
 link3.onclick = function (e) {
     for(var index3 in toggleableLayerIds3) {
@@ -757,7 +780,7 @@ var toggleableLayerIds4 = [ 'Railway Stations'];
 
 var link4 = document.createElement('a');
 link4.href = '#';
-link4.className = 'active';
+//link4.className = 'active';
 link4.textContent = "Railway station";
 link4.onclick = function (e) {
     for(var index4 in toggleableLayerIds4) {
@@ -783,7 +806,7 @@ var toggleableLayerIds5 = [ 'Diagnostic Health Centers'];
 
 var link5 = document.createElement('a');
 link5.href = '#';
-link5.className = 'active';
+//link5.className = 'active';
 link5.textContent = "Public diagnostic/treatment center";
 link5.onclick = function (e) {
     for(var index5 in toggleableLayerIds5) {
@@ -809,7 +832,7 @@ var toggleableLayerIds6 = [ 'Public Hospitals'];
 
 var link6 = document.createElement('a');
 link6.href = '#';
-link6.className = 'active';
+//link6.className = 'active';
 link6.textContent = "Public hospitals";
 link6.onclick = function (e) {
     for(var index6 in toggleableLayerIds6) {
@@ -835,7 +858,7 @@ var toggleableLayerIds7 = [ 'Urgent Care Centers'];
 
 var link7 = document.createElement('a');
 link7.href = '#';
-link7.className = 'active';
+//link7.className = 'active';
 link7.textContent = "Public urgent care centers";
 link7.onclick = function (e) {
     for(var index7 in toggleableLayerIds7) {
@@ -861,7 +884,7 @@ var toggleableLayerIds8 = [ 'Public Kindergartens'];
 
 var link8 = document.createElement('a');
 link8.href = '#';
-link8.className = 'active';
+//link8.className = 'active';
 link8.textContent = "Public kindergartens";
 link8.onclick = function (e) {
     for(var index8 in toggleableLayerIds8) {
@@ -879,25 +902,68 @@ link8.onclick = function (e) {
           map.setLayoutProperty(clickedLayer8, 'visibility', 'visible');
       }
     }
-
 };
 
 // Adds the public urgent care centers to the map
 var toggleableLayerIds9 = [ 'Public Primary Schools'];
 
+var link9 = document.createElement('a');
+link9.href = '#';
+link9.textContent = "Public primary schools";
+link9.onclick = function (e) {
+    for(var index9 in toggleableLayerIds9) {
+      var clickedLayer9 = toggleableLayerIds9[index9];
+      e.preventDefault();
+      e.stopPropagation();
+
+      var visibility9 = map.getLayoutProperty(clickedLayer9, 'visibility');
+
+      if (visibility9 === 'visible') {
+          map.setLayoutProperty(clickedLayer9, 'visibility', 'none');
+          this.className = '';
+      } else {
+          this.className = 'active';
+          map.setLayoutProperty(clickedLayer9, 'visibility', 'visible');
+      }
+    }
+};
+
 // Adds the public urgent care centers to the map
 var toggleableLayerIds0 = [ 'Public Secondary Schools'];
 
+var link0 = document.createElement('a');
+link0.href = '#';
+link0.textContent = "Public secondary schools";
+link0.onclick = function (e) {
+    for(var index0 in toggleableLayerIds0) {
+      var clickedLayer0 = toggleableLayerIds0[index0];
+      e.preventDefault();
+      e.stopPropagation();
 
-var layers = document.getElementById('feature-menu');
-layers.appendChild(link);
-layers.appendChild(link2);
-layers.appendChild(link3);
-layers.appendChild(link4);
-layers.appendChild(link5);
-layers.appendChild(link6);
-layers.appendChild(link7);
-layers.appendChild(link8);
+      var visibility0 = map.getLayoutProperty(clickedLayer0, 'visibility');
+
+      if (visibility0 === 'visible') {
+          map.setLayoutProperty(clickedLayer0, 'visibility', 'none');
+          this.className = '';
+      } else {
+          this.className = 'active';
+          map.setLayoutProperty(clickedLayer0, 'visibility', 'visible');
+      }
+    }
+};
+
+// Adds the layer selection boxes to the map
+var layer_menu = document.getElementById('feature-menu');
+layer_menu.appendChild(link1);
+layer_menu.appendChild(link2);
+layer_menu.appendChild(link3);
+layer_menu.appendChild(link4);
+layer_menu.appendChild(link5);
+layer_menu.appendChild(link6);
+layer_menu.appendChild(link7);
+layer_menu.appendChild(link8);
+layer_menu.appendChild(link9);
+layer_menu.appendChild(link0);
 
 // --------------------------------------------------------------------------------------------------
 // When a click event occurs on a feature in the states layer, open a popup at the
