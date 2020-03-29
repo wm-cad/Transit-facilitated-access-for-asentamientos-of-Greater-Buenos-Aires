@@ -6,7 +6,7 @@
   <script src='https://api.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.js'></script>
   <link href='https://api.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.css' rel='stylesheet' />
   <style>
-    body { margin:0; padding:10; }
+    body { margin:0; padding:5; }
   </style>
 </head>
 
@@ -89,9 +89,10 @@
   }
 
 /* This adjusts the pop-ups */
-#popup .mapboxgl-popup {
+.mapboxgl-popup {
       max-width: 400px;
       font: 14px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+      font-size: 14px;
   }
 
 /* This controls the size and location of the legend */
@@ -122,11 +123,20 @@
   color: #E8E8E8;
   }
 
+.legend div span-rec {
+    border-radius: 0%;
+    display: inline-block;
+    height: 10px;
+    width: 15px;
+    margin-right: 10px;
+    /*font-size: 12px;*/
+    }
+
 .legend div span {
-  border-radius: 40%;
+  border-radius: 50%;
   display: inline-block;
-  height: 10px;
-  width: 10px;
+  height: 8px;
+  width: 8px;
   margin-right: 10px;
   /*font-size: 12px;*/
   }
@@ -140,8 +150,8 @@
 
 <div id="asent-legend" class="legend">
   <h3>Origins</h3>
-  <div><span style="background-color: #00a1ff"></span>Asentamientos</div>
-  <div><span style="background-color: gray"></span>Sampled department or radio</div>
+  <div><span-rec style="background-color: #00a1ff"></span-rec>Asentamientos</div>
+  <div><span-rec style="background-color: gray"></span-rec>Sampled department or radio</div>
   <h3>Destinations</h3>
   <div><span style="background-color: gold"></span>City/department centers</div>
   <div><span style="background-color: #655745"></span>Railway Stations</div>
@@ -171,7 +181,8 @@
     style: 'mapbox://styles/mapbox/light-v10', //style URL
     center: [-58.5256, -34.66], //start position (lat/long)
     zoom: 9,
-    minZoom: 9
+    minZoom: 9,
+    maxZoom: 13
 });
 
 // --------------------------------------------------------------------------------------------------
@@ -558,26 +569,6 @@ map.on('load', function () {
 
 
 
-
-  //Adds the asentamientos to the map.
-   map.addLayer({
-         "id": "Asentamientos",
-         "type": "fill",
-         "source": {
-           type: 'vector',
-           url: 'mapbox://kjtitlowsorlie.3kqkd08u',
-         },
-         "source-layer": "techo_amba30_asent-8fr5iw",
-         //"layout":
-         "paint": {
-           "fill-opacity": 0.3,
-           "fill-color": "#00a1ff"
-         }
-   });
-
-
-
-
    //Adds the major passenger rail lines to the map
     map.addLayer({
           "id": "Railway Lines",
@@ -677,6 +668,42 @@ map.on('load', function () {
           "fill-opacity": 0.05
         }
   });
+
+  //Adds the asentamientos to the map.
+   map.addLayer({
+         "id": "Asentamientos",
+         "type": "fill",
+         "source": {
+           type: 'vector',
+           url: 'mapbox://kjtitlowsorlie.3kqkd08u',
+         },
+         "source-layer": "techo_amba30_asent-8fr5iw",
+         //"layout":
+         "paint": {
+           "fill-opacity": 0.3,
+           "fill-color": "#00a1ff"
+         }
+   });
+
+   // When a click event occurs on a feature in the states layer, open a popup at the
+   // location of the click, with description HTML from its properties.
+   map.on('click', 'Asentamientos', function(e) {
+     new mapboxgl.Popup()
+       .setLngLat(e.lngLat)
+       .setHTML(e.features[0].properties.nombre_barrio)
+       .addTo(map);
+   });
+
+   // Change the cursor to a pointer when the mouse is over the states layer.
+   map.on('mouseenter', 'Asentamientos', function() {
+   map.getCanvas().style.cursor = 'pointer';
+   });
+
+   // Change it back to a pointer when it leaves.
+   map.on('mouseleave', 'Asentamientos', function() {
+   map.getCanvas().style.cursor = '';
+   });
+
 });
 
 // --------------------------------------------------------------------------------------------------
@@ -949,24 +976,6 @@ layer_menu.appendChild(link9);
 layer_menu.appendChild(link0);
 
 // --------------------------------------------------------------------------------------------------
-// When a click event occurs on a feature in the states layer, open a popup at the
-// location of the click, with description HTML from its properties.
-map.on('click', 'TT: BsAs CBD, Zout', function(e) {
-new mapboxgl.Popup()
-.setLngLat(e.lngLat)
-.setHTML(e.features[0].properties.CODIGO_TXT)
-.addTo(map);
-});
-
-// Change the cursor to a pointer when the mouse is over the states layer.
-map.on('mouseenter', 'TT: BsAs CBD, Zout', function() {
-map.getCanvas().style.cursor = 'pointer';
-});
-
-// Change it back to a pointer when it leaves.
-map.on('mouseleave', 'TT: BsAs CBD, Zout', function() {
-map.getCanvas().style.cursor = '';
-});
 
 // -------------------------------------------------------------------------------------------------
 // Add a legend to the map
