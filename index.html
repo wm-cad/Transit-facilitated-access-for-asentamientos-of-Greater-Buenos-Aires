@@ -12,7 +12,6 @@
 
 <body>
 <style>
-
 /* This controls styling for the map elements */
 .map {
   background-color: #8BBAD8;
@@ -52,7 +51,7 @@
 .menu p {
       color: #E8E8E8;
       font-size: 14px;
-      margin: 10 5 5px;
+      margin: 10 5 10px;
     }
 
 .menu a {
@@ -86,7 +85,7 @@
   }
 
 .menu a.active:hover {
-    background: #3074a4;
+    background: #1C5989;
   }
 
 /* This adjusts the pop-ups */
@@ -100,11 +99,12 @@
   background-color: #232323;
   border-radius: 2px;
   font: 12px/18px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  font-size: 12px;
   color: #E8E8E8;
   /*box-shadow: 0 1px 2px rgba(0, 0, 0, 1);*/
-  padding: 15px;
+  padding: 10px;
   position: absolute;
-  bottom: 25px;
+  bottom: 30px;
   left: 25px;
   z-index: 1;
   border: 2px solid block;
@@ -141,10 +141,10 @@
 <div id="asent-legend" class="legend">
   <h3>Origins</h3>
   <div><span style="background-color: #00a1ff"></span>Asentamientos</div>
-  <div><span style="background-color: gray"></span>Sampled census radios</div>
+  <div><span style="background-color: gray"></span>Sampled department or radio</div>
   <h3>Destinations</h3>
   <div><span style="background-color: gold"></span>City/department centers</div>
-  <div><span style="background-color: black"></span>Railway Stations</div>
+  <div><span style="background-color: #655745"></span>Railway Stations</div>
   <div><span style="background-color: #ff0000"></span>Public Healthcare</div>
   <div><span style="background-color: green"></span>Public Schools</div>
   <h3>Travel Times</h3>
@@ -161,7 +161,7 @@
 
 <div id='map' class="map" style='height:100%; width:100%'>
 <h1>De alguna manera llegas</h1>
-<p>Relative public transportation-facilitated access of the asentamientos of greater Buenos Aires, Argentina (2018)</p>
+<p>Comparing the accessibility of critical daily activity sites, measured in estimated minutes of travel on public transportation,<br>between the informal <i>asentamientos</i> and formal neighborhoods of greater Buenos Aires, Argentina</p>
 </div>
 
 <script>
@@ -169,7 +169,7 @@
   var map = new mapboxgl.Map({
     container: 'map', //HTML container ID
     style: 'mapbox://styles/mapbox/light-v10', //style URL
-    center: [-58.5256, -34.6588], //start position (lat/long)
+    center: [-58.5256, -34.66], //start position (lat/long)
     zoom: 9,
     minZoom: 9
 });
@@ -337,7 +337,7 @@ map.on('load', function () {
          },
          "filter": ["==", "nivel", 'Nivel Inicial'],
          "paint": {
-           "circle-radius": 1.5,
+           "circle-radius": 2,
            "circle-color": "green"
          }
    });
@@ -357,14 +357,7 @@ map.on('load', function () {
           "filter": ["==", "nivel", 'Nivel Primario'],
           "paint": {
             "circle-radius": 2,
-            "circle-color": [
-                 'match',
-                 ['get', 'nivel'],
-                 'Nivel Inicial', '#6e3dff',
-                 'Nivel Primario', '#3900e6',
-                 'Nivel Secundario', '#200080',
-                 /* other */ '#ccc'
-            ]
+            "circle-color": "green"
           }
     });
 
@@ -384,14 +377,7 @@ map.on('load', function () {
               "filter": ["==", "nivel", 'Nivel Secundario'],
               "paint": {
                 "circle-radius": 2,
-                "circle-color": [
-                     'match',
-                     ['get', 'nivel'],
-                     'Nivel Inicial', '#6e3dff',
-                     'Nivel Primario', '#3900e6',
-                     'Nivel Secundario', '#200080',
-                     /* other */ '#ccc'
-                ]
+                "circle-color": "green"
               }
         });
 
@@ -463,7 +449,8 @@ map.on('load', function () {
         "source-layer": "transport_rail_stations",
         //"layout":
         "paint": {
-          "circle-radius": 2
+          "circle-radius": 2.5,
+          "circle-color": "#655745"
         }
   });
 
@@ -600,10 +587,6 @@ map.on('load', function () {
             url: 'mapbox://kjtitlowsorlie.04rgotuk',
           },
           "source-layer": "transport_amba24_rail-bb81bc"//,
-          //"layout":
-          //"paint": {
-          //  "circle-radius": 3
-          //}
     });
 
 
@@ -621,8 +604,8 @@ map.on('load', function () {
            "minzoom": 11,
            "paint": {
              "fill-opacity": 0.1,
-             //"fill-color": "#FFFFFF",
-             "fill-outline-color": "black"
+             //"fill-color": '#',
+             //"fill-outline-color": "black"
            }
      });
 
