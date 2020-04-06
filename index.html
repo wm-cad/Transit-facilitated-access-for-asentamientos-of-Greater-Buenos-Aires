@@ -12,6 +12,7 @@
 
 <body>
 <style>
+
 /* This controls styling for the map elements */
 .map {
   background-color: #8BBAD8;
@@ -25,9 +26,14 @@
   font-size: 30px;
 }
 
-.map p {
-  margin: 10 10 15px;
+.map h4 {
+  margin: 10 10 10px;
   font-size: 16px;
+}
+
+.map p {
+  margin: 10 10 8px;
+  font-size: 11.5px;
 }
 
 /* This controls the menu for selecting layers on and off */
@@ -62,7 +68,7 @@
     //border: 1px solid navy;
     display: block;
     margin: 0;
-    padding: 0;
+    /*padding: 0;*/
     padding: 5px;
     text-decoration: none;
     border-top: 1px solid black;
@@ -93,6 +99,7 @@
       max-width: 400px;
       font: 14px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
       font-size: 14px;
+      border-radius: 2px;
   }
 
 /* This controls the size and location of the legend */
@@ -105,7 +112,7 @@
   /*box-shadow: 0 1px 2px rgba(0, 0, 0, 1);*/
   padding: 10px;
   position: absolute;
-  bottom: 30px;
+  bottom: 40px;
   left: 25px;
   z-index: 1;
   border: 2px solid block;
@@ -135,8 +142,8 @@
 .legend div span {
   border-radius: 50%;
   display: inline-block;
-  height: 8px;
-  width: 8px;
+  height: 10px;
+  width: 10px;
   margin-right: 10px;
   /*font-size: 12px;*/
   }
@@ -145,33 +152,31 @@
 
 <div id="feature-menu" class="menu">
   <h3>Travel Times</h3>
-  <p>Click on a destination to show the minimum public transit-based travel time to that amenity from each of the sampled census radios.</p>
+  <p>Click on a destination to show the minimum public transit-based travel time to that amenity.</p>
+  <p>Census <i>radios</i> were randomly selected based on overlap with a known <i>asentamiento</i> in one of the three studied departments.</p>
 </div>
 
 <div id="asent-legend" class="legend">
   <h3>Origins</h3>
   <div><span-rec style="background-color: #00a1ff"></span-rec>Asentamientos</div>
-  <div><span-rec style="background-color: gray"></span-rec>Sampled department or radio</div>
+  <div><span-rec style="background-color: gray"></span-rec>Studied department or <i>radio</i></div>
   <h3>Destinations</h3>
   <div><span style="background-color: gold"></span>City/department centers</div>
   <div><span style="background-color: #655745"></span>Railway Stations</div>
   <div><span style="background-color: #ff0000"></span>Public Healthcare</div>
-  <div><span style="background-color: green"></span>Public Schools</div>
+  <div><span style="background-color: #148F77"></span>Public Schools</div>
   <h3>Travel Times</h3>
-  <p>Larger circle for longer travel time.</p>
-  <div><span style="background-color: #cbf3a5"></span>No asentamiento</div>
-  <div><span style="background-color: #f3dda5"></span>Possible asentamiento</div>
-  <div><span style="background-color: #f3a5a5"></span>Likely asentamiento</div>
-  <h3>Sources</h3>
-  TECHO
-  INDEC
-  Province
+  <h3>(Census <i>Radios</i>)</h3>
+  <div><span style="background-color: #cbf3a5"></span><i>Radio</i> without asent.</div>
+  <div><span style="background-color: #f3dda5"></span><i>Radio</i> partially asent.</div>
+  <div><span style="background-color: #f3a5a5"></span><i>Radio</i> mostly asent.</div>
   </ul>
 </div>
 
 <div id='map' class="map" style='height:100%; width:100%'>
 <h1>De alguna manera llegas</h1>
-<p>Comparing the accessibility of critical daily activity sites, measured in estimated minutes of travel on public transportation,<br>between the informal <i>asentamientos</i> and formal neighborhoods of greater Buenos Aires, Argentina</p>
+<h4>The accessibility of daily activity sites, measured by estimated minutes of travel on public transportation (autumn 2018),<br>from the informal <i>asentamientos</i> of greater Buenos Aires, Argentina, compared with formal neighborhoods</h4>
+<p><b>Sources:</b> <i>Asentamientos</i>, TECHO; Census geographies, INDEC; Schools, health sites, and railroad stations, Province of Buenos Aires; Travel times, Google Transit API
 </div>
 
 <script>
@@ -179,7 +184,7 @@
   var map = new mapboxgl.Map({
     container: 'map', //HTML container ID
     style: 'mapbox://styles/mapbox/light-v10', //style URL
-    center: [-58.5256, -34.66], //start position (lat/long)
+    center: [-58.5256, -34.7], //start position (lat/long)
     zoom: 9,
     minZoom: 9,
     maxZoom: 13
@@ -188,12 +193,19 @@
 // --------------------------------------------------------------------------------------------------
 // Add your own data on top of the basemap
 // You can add raster data, geoJSON files, WMS dta, etc.
+
 map.on('load', function () {
+
+  var zoom = map.getZoom();
+  var zoom_neg = zoom - 14;
+  var zoomFac_TTbsas = zoom_neg * -5;
+  var zoomFac_TTcbd = zoom_neg * -4;
+  var zoomFac_TTlow = zoom_neg * -2;
 
   // ORIGINS ---------------------------------------------------------
   // Adds the Buenos Aires CBD travel times to the map
    map.addLayer({
-         "id": "TT: BsAs CBD, Zout",
+         "id": "TT: BsAs CBD",
          "type": "circle",
          "source": {
            type: 'vector',
@@ -203,68 +215,51 @@ map.on('load', function () {
          "layout": {
              "visibility": "none"
          },
-         "maxzoom": 11,
          "paint": {
            "circle-radius":
-                ['/', ['get', 'trvtime_cbd_bsas'], 30],
+                ['/', ['get', 'trvtime_cbd_bsas'], zoomFac_TTbsas],
            "circle-color": [
                 'match',
                 ['get', 'COVERAGE_TYPE'],
-                'NONE', '#cbf3a5',
-                'MIN', '#f3dda5',
-                'MAJ', '#f3a5a5',
+                'NONE', '#DCEDC8',
+                'MIN', '#8BC34A',
+                'MAJ', '#33691E',
                 /* other */ '#ccc'
            ],
-           "circle-stroke-width": 1,
+           "circle-stroke-width": 0.8,
            "circle-stroke-color": [
              'match',
              ['get', 'COVERAGE_TYPE'],
-             'NONE', '#217109',
-             'MIN', '#b3900f',
-             'MAJ', '#8e120b',
+             'NONE', '#196F3D',
+             'MIN', '#196F3D',
+             'MAJ', '#196F3D',
              /* other */ '#ccc'
             ]
          }
    });
 
-   map.addLayer({
-         "id": "TT: BsAs CBD, Zin",
-         "type": "circle",
-         "source": {
-           type: 'vector',
-           url: 'mapbox://kjtitlowsorlie.670ruj5d',
-         },
-         "source-layer": "origin_radio_n3_tt_all-9auufk",
-         "layout": {
-             "visibility": "none"
-         },
-         "minzoom": 11,
-         "paint": {
-           "circle-radius":
-                ['/', ['get', 'trvtime_cbd_bsas'], 15],
-           "circle-color": [
-                'match',
-                ['get', 'COVERAGE_TYPE'],
-                'NONE', '#cbf3a5',
-                'MIN', '#f3dda5',
-                'MAJ', '#f3a5a5',
-                /* other */ '#ccc'
-           ],
-           "circle-stroke-width": 1,
-           "circle-stroke-color": [
-             'match',
-             ['get', 'COVERAGE_TYPE'],
-             'NONE', '#217109',
-             'MIN', '#b3900f',
-             'MAJ', '#8e120b',
-             /* other */ '#ccc'
-            ]
-         }
+   // When a click event occurs on a feature in the states layer, open a popup at the
+   // location of the click, with description HTML from its properties.
+   map.on('click', 'TT: BsAs CBD', function(e) {
+     new mapboxgl.Popup()
+       .setLngLat(e.lngLat)
+       .setHTML('<table><tr><td>>To Buenos Aires:</td><td>' + e.features[0].properties.trvtime_cbd_bsas) + '</td></tr></table>'
+       .addTo(map);
+   });
+
+   // Change the cursor to a pointer when the mouse is over the states layer.
+   map.on('mouseenter', 'TT: BsAs CBD', function() {
+   map.getCanvas().style.cursor = 'pointer';
+   });
+
+   // Change it back to a pointer when it leaves.
+   map.on('mouseleave', 'TT: BsAs CBD', function() {
+   map.getCanvas().style.cursor = '';
    });
 
    // Adds the Departmental CBD travel times to the map
   map.addLayer({
-          "id": "TT: Dept CBD, Zout",
+          "id": "TT: Dept CBD",
           "type": "circle",
           "source": {
             type: 'vector',
@@ -274,10 +269,9 @@ map.on('load', function () {
           "layout": {
               "visibility": "none"
           },
-          "maxzoom": 11,
           "paint": {
             "circle-radius":
-                 ['/', ['get', 'trvtime_cbd_loc'], 60],
+                 ['/', ['get', 'trvtime_cbd_loc'], zoomFac_TTcbd],
             "circle-color": [
                  'match',
                  ['get', 'COVERAGE_TYPE'],
@@ -298,8 +292,9 @@ map.on('load', function () {
           }
     });
 
-  map.addLayer({
-           "id": "TT: Dept CBD, Zin",
+    // Adds the Departmental CBD travel times to the map
+   map.addLayer({
+           "id": "TT: Any Dept CBD",
            "type": "circle",
            "source": {
              type: 'vector',
@@ -309,10 +304,9 @@ map.on('load', function () {
            "layout": {
                "visibility": "none"
            },
-           "minzoom": 11,
            "paint": {
              "circle-radius":
-                  ['/', ['get', 'trvtime_cbd_loc'], 15],
+                  ['/', ['get', 'trvtime_cbd_ngh_min'], zoomFac_TTcbd],
              "circle-color": [
                   'match',
                   ['get', 'COVERAGE_TYPE'],
@@ -333,6 +327,251 @@ map.on('load', function () {
            }
      });
 
+     // Adds the railway station travel times to the map
+    map.addLayer({
+            "id": "TT: Railroads",
+            "type": "circle",
+            "source": {
+              type: 'vector',
+              url: 'mapbox://kjtitlowsorlie.670ruj5d',
+            },
+            "source-layer": "origin_radio_n3_tt_all-9auufk",
+            "layout": {
+                "visibility": "none"
+            },
+            "paint": {
+              "circle-radius":
+                   ['/', ['get', 'trvtime_rail_min'], 30],
+              "circle-color": [
+                   'match',
+                   ['get', 'COVERAGE_TYPE'],
+                   'NONE', '#cbf3a5',
+                   'MIN', '#f3dda5',
+                   'MAJ', '#f3a5a5',
+                   /* other */ '#ccc'
+              ],
+              "circle-stroke-width": 1,
+              "circle-stroke-color": [
+                'match',
+                ['get', 'COVERAGE_TYPE'],
+                'NONE', '#217109',
+                'MIN', '#b3900f',
+                'MAJ', '#8e120b',
+                /* other */ '#ccc'
+               ]
+            }
+      });
+
+      // Adds the diagnostic/treatment travel times to the map
+     map.addLayer({
+             "id": "TT: DiagTreat",
+             "type": "circle",
+             "source": {
+               type: 'vector',
+               url: 'mapbox://kjtitlowsorlie.670ruj5d',
+             },
+             "source-layer": "origin_radio_n3_tt_all-9auufk",
+             "layout": {
+                 "visibility": "none"
+             },
+             "paint": {
+               "circle-radius":
+                    ['/', ['get', 'trvtime_dgntrt_min'], 15],
+               "circle-color": [
+                    'match',
+                    ['get', 'COVERAGE_TYPE'],
+                    'NONE', '#cbf3a5',
+                    'MIN', '#f3dda5',
+                    'MAJ', '#f3a5a5',
+                    /* other */ '#ccc'
+               ],
+               "circle-stroke-width": 1,
+               "circle-stroke-color": [
+                 'match',
+                 ['get', 'COVERAGE_TYPE'],
+                 'NONE', '#217109',
+                 'MIN', '#b3900f',
+                 'MAJ', '#8e120b',
+                 /* other */ '#ccc'
+                ]
+             }
+       });
+
+       // Adds the hospital travel times to the map
+      map.addLayer({
+              "id": "TT: Hospitals",
+              "type": "circle",
+              "source": {
+                type: 'vector',
+                url: 'mapbox://kjtitlowsorlie.670ruj5d',
+              },
+              "source-layer": "origin_radio_n3_tt_all-9auufk",
+              "layout": {
+                  "visibility": "none"
+              },
+              "paint": {
+                "circle-radius":
+                     ['/', ['get', 'trvtime_hspt_min'], 15],
+                "circle-color": [
+                     'match',
+                     ['get', 'COVERAGE_TYPE'],
+                     'NONE', '#cbf3a5',
+                     'MIN', '#f3dda5',
+                     'MAJ', '#f3a5a5',
+                     /* other */ '#ccc'
+                ],
+                "circle-stroke-width": 1,
+                "circle-stroke-color": [
+                  'match',
+                  ['get', 'COVERAGE_TYPE'],
+                  'NONE', '#217109',
+                  'MIN', '#b3900f',
+                  'MAJ', '#8e120b',
+                  /* other */ '#ccc'
+                 ]
+              }
+        });
+
+        // Adds the UPA travel times to the map
+       map.addLayer({
+               "id": "TT: UPAs",
+               "type": "circle",
+               "source": {
+                 type: 'vector',
+                 url: 'mapbox://kjtitlowsorlie.670ruj5d',
+               },
+               "source-layer": "origin_radio_n3_tt_all-9auufk",
+               "layout": {
+                   "visibility": "none"
+               },
+               "paint": {
+                 "circle-radius":
+                      ['/', ['get', 'trvtime_upa_min'], 15],
+                 "circle-color": [
+                      'match',
+                      ['get', 'COVERAGE_TYPE'],
+                      'NONE', '#cbf3a5',
+                      'MIN', '#f3dda5',
+                      'MAJ', '#f3a5a5',
+                      /* other */ '#ccc'
+                 ],
+                 "circle-stroke-width": 1,
+                 "circle-stroke-color": [
+                   'match',
+                   ['get', 'COVERAGE_TYPE'],
+                   'NONE', '#217109',
+                   'MIN', '#b3900f',
+                   'MAJ', '#8e120b',
+                   /* other */ '#ccc'
+                  ]
+               }
+         });
+
+         // Adds the kindergarten travel times to the map
+        map.addLayer({
+                "id": "TT: Kindergarten",
+                "type": "circle",
+                "source": {
+                  type: 'vector',
+                  url: 'mapbox://kjtitlowsorlie.670ruj5d',
+                },
+                "source-layer": "origin_radio_n3_tt_all-9auufk",
+                "layout": {
+                    "visibility": "none"
+                },
+                "paint": {
+                  "circle-radius":
+                       ['/', ['get', 'trvtime_edknd_min'], 3],
+                  "circle-color": [
+                       'match',
+                       ['get', 'COVERAGE_TYPE'],
+                       'NONE', '#cbf3a5',
+                       'MIN', '#f3dda5',
+                       'MAJ', '#f3a5a5',
+                       /* other */ '#ccc'
+                  ],
+                  "circle-stroke-width": 1,
+                  "circle-stroke-color": [
+                    'match',
+                    ['get', 'COVERAGE_TYPE'],
+                    'NONE', '#217109',
+                    'MIN', '#b3900f',
+                    'MAJ', '#8e120b',
+                    /* other */ '#ccc'
+                   ]
+                }
+          });
+
+          // Adds the primary school travel times to the map
+         map.addLayer({
+                 "id": "TT: Primary Ed",
+                 "type": "circle",
+                 "source": {
+                   type: 'vector',
+                   url: 'mapbox://kjtitlowsorlie.670ruj5d',
+                 },
+                 "source-layer": "origin_radio_n3_tt_all-9auufk",
+                 "layout": {
+                     "visibility": "none"
+                 },
+                 "paint": {
+                   "circle-radius":
+                        ['/', ['get', 'trvtime_edprm_min'], 3],
+                   "circle-color": [
+                        'match',
+                        ['get', 'COVERAGE_TYPE'],
+                        'NONE', '#cbf3a5',
+                        'MIN', '#f3dda5',
+                        'MAJ', '#f3a5a5',
+                        /* other */ '#ccc'
+                   ],
+                   "circle-stroke-width": 1,
+                   "circle-stroke-color": [
+                     'match',
+                     ['get', 'COVERAGE_TYPE'],
+                     'NONE', '#217109',
+                     'MIN', '#b3900f',
+                     'MAJ', '#8e120b',
+                     /* other */ '#ccc'
+                    ]
+                 }
+           });
+
+           // Adds the secondary school travel times to the map
+          map.addLayer({
+                  "id": "TT: Secondary Ed",
+                  "type": "circle",
+                  "source": {
+                    type: 'vector',
+                    url: 'mapbox://kjtitlowsorlie.670ruj5d',
+                  },
+                  "source-layer": "origin_radio_n3_tt_all-9auufk",
+                  "layout": {
+                      "visibility": "none"
+                  },
+                  "paint": {
+                    "circle-radius":
+                         ['/', ['get', 'trvtime_edsec_min'], 3],
+                    "circle-color": [
+                         'match',
+                         ['get', 'COVERAGE_TYPE'],
+                         'NONE', '#cbf3a5',
+                         'MIN', '#f3dda5',
+                         'MAJ', '#f3a5a5',
+                         /* other */ '#ccc'
+                    ],
+                    "circle-stroke-width": 1,
+                    "circle-stroke-color": [
+                      'match',
+                      ['get', 'COVERAGE_TYPE'],
+                      'NONE', '#217109',
+                      'MIN', '#b3900f',
+                      'MAJ', '#8e120b',
+                      /* other */ '#ccc'
+                     ]
+                  }
+            });
+
   // DESTINATIONS --------------------------------------------------------------------------------------
   // Adds kindergartens the map
    map.addLayer({
@@ -347,9 +586,10 @@ map.on('load', function () {
              "visibility": "none"
          },
          "filter": ["==", "nivel", 'Nivel Inicial'],
+         "minzoom": 12,
          "paint": {
            "circle-radius": 2,
-           "circle-color": "green"
+           "circle-color": "#1B4F72"
          }
    });
 
@@ -366,9 +606,10 @@ map.on('load', function () {
               "visibility": "none"
           },
           "filter": ["==", "nivel", 'Nivel Primario'],
+          "minzoom": 12,
           "paint": {
             "circle-radius": 2,
-            "circle-color": "green"
+            "circle-color": "#1B4F72"
           }
     });
 
@@ -386,9 +627,10 @@ map.on('load', function () {
                   "visibility": "none"
               },
               "filter": ["==", "nivel", 'Nivel Secundario'],
+              "minzoom": 12,
               "paint": {
                 "circle-radius": 2,
-                "circle-color": "green"
+                "circle-color": "#1B4F72"
               }
         });
 
@@ -405,8 +647,10 @@ map.on('load', function () {
         "layout": {
           "visibility": "none"
         },
+        "filter": ["==", ["get", "provincia"], "Buenos Aires"],
+        "minzoom": 12,
         "paint": {
-          "circle-radius": 2.5,
+          "circle-radius": 2,
           "circle-color": "#ff0000"
         }
   });
@@ -420,12 +664,13 @@ map.on('load', function () {
            url: 'mapbox://kjtitlowsorlie.b91ojl8b',
          },
          "source-layer": "destinations_health_hospitals-ar86ee",
-         'filter': ["!=", "provincia", "CABA"],
          "layout": {
            "visibility": "none"
          },
+         "filter": ["==", ["get", "provincia"], "Buenos Aires"],
+         "minzoom": 12,
          "paint": {
-           "circle-radius": 2.5,
+           "circle-radius": 2,
            "circle-color": "#ff0000"
          }
    });
@@ -442,8 +687,9 @@ map.on('load', function () {
           "layout": {
             "visibility": "none"
           },
+          "minzoom": 12,
           "paint": {
-            "circle-radius": 2.5,
+            "circle-radius": 2,
             "circle-color": "#ff0000"
           }
     });
@@ -460,7 +706,7 @@ map.on('load', function () {
         "source-layer": "transport_rail_stations",
         //"layout":
         "paint": {
-          "circle-radius": 2.5,
+          "circle-radius": 2,
           "circle-color": "#655745"
         }
   });
@@ -561,9 +807,9 @@ map.on('load', function () {
         },
         "paint": {
           "circle-radius": 6,
-          "circle-color": "#deb72a",
-          'circle-stroke-color': '#7d6614',
-          'circle-stroke-width': 1,
+          "circle-color": "#FFCC80",
+          'circle-stroke-color': '#E65100',
+          'circle-stroke-width': 3,
         }
   });
 
@@ -680,7 +926,7 @@ map.on('load', function () {
          "source-layer": "techo_amba30_asent-8fr5iw",
          //"layout":
          "paint": {
-           "fill-opacity": 0.3,
+           "fill-opacity": 0.2,
            "fill-color": "#00a1ff"
          }
    });
@@ -690,7 +936,7 @@ map.on('load', function () {
    map.on('click', 'Asentamientos', function(e) {
      new mapboxgl.Popup()
        .setLngLat(e.lngLat)
-       .setHTML(e.features[0].properties.nombre_barrio)
+       .setHTML('<b>Asentamiento: </b><br>' + e.features[0].properties.nombre_barrio)
        .addTo(map);
    });
 
@@ -708,7 +954,7 @@ map.on('load', function () {
 
 // --------------------------------------------------------------------------------------------------
 // Adds the Buenos Aires CBD travel times and feature to the map
-var toggleableLayerIds1 = [ 'Buenos Aires CBD', 'TT: BsAs CBD, Zout', 'TT: BsAs CBD, Zin' ];
+var toggleableLayerIds1 = ['Buenos Aires CBD', 'TT: BsAs CBD'];
 
 var link1 = document.createElement('a');
 link1.href = '#';
@@ -734,7 +980,7 @@ link1.onclick = function (e) {
 };
 
 // Adds the Departmental CBD travel times and features to the map
-var toggleableLayerIds2 = [ 'Quilmes CBD', 'La Matanza CBD', 'Pilar CBD', 'TT: Dept CBD, Zout', 'TT: Dept CBD, Zin' ];
+var toggleableLayerIds2 = [ 'Quilmes CBD', 'La Matanza CBD', 'Pilar CBD', 'TT: Dept CBD' ];
 
 var link2 = document.createElement('a');
 link2.href = '#';
@@ -760,7 +1006,7 @@ link2.onclick = function (e) {
 };
 
 // Adds the proximate CBD's layer to the map
-var toggleableLayerIds3 = [ 'Proximate CBDs', 'Pilar CBD', 'La Matanza CBD', 'Quilmes CBD'];
+var toggleableLayerIds3 = [ 'Proximate CBDs', 'Pilar CBD', 'La Matanza CBD', 'Quilmes CBD', 'TT: Any Dept CBD'];
 
 var link3 = document.createElement('a');
 link3.href = '#';
@@ -786,7 +1032,7 @@ link3.onclick = function (e) {
 };
 
 // Adds the railway stations to the map
-var toggleableLayerIds4 = [ 'Railway Stations'];
+var toggleableLayerIds4 = [ 'Railway Stations', 'TT: Railroads'];
 
 var link4 = document.createElement('a');
 link4.href = '#';
@@ -812,7 +1058,7 @@ link4.onclick = function (e) {
 };
 
 // Adds the public diagnostic centers to the map
-var toggleableLayerIds5 = [ 'Diagnostic Health Centers'];
+var toggleableLayerIds5 = [ 'Diagnostic Health Centers', "TT: DiagTreat"];
 
 var link5 = document.createElement('a');
 link5.href = '#';
@@ -838,7 +1084,7 @@ link5.onclick = function (e) {
 };
 
 // Adds the public hospitals to the map
-var toggleableLayerIds6 = [ 'Public Hospitals'];
+var toggleableLayerIds6 = [ 'Public Hospitals', "TT: Hospitals"];
 
 var link6 = document.createElement('a');
 link6.href = '#';
@@ -864,7 +1110,7 @@ link6.onclick = function (e) {
 };
 
 // Adds the public urgent care centers to the map
-var toggleableLayerIds7 = [ 'Urgent Care Centers'];
+var toggleableLayerIds7 = [ 'Urgent Care Centers', "TT: UPAs"];
 
 var link7 = document.createElement('a');
 link7.href = '#';
@@ -890,7 +1136,7 @@ link7.onclick = function (e) {
 };
 
 // Adds the public urgent care centers to the map
-var toggleableLayerIds8 = [ 'Public Kindergartens'];
+var toggleableLayerIds8 = [ 'Public Kindergartens', "TT: Kindergarten"];
 
 var link8 = document.createElement('a');
 link8.href = '#';
@@ -915,7 +1161,7 @@ link8.onclick = function (e) {
 };
 
 // Adds the public urgent care centers to the map
-var toggleableLayerIds9 = [ 'Public Primary Schools'];
+var toggleableLayerIds9 = [ 'Public Primary Schools', "TT: Primary Ed"];
 
 var link9 = document.createElement('a');
 link9.href = '#';
@@ -939,7 +1185,7 @@ link9.onclick = function (e) {
 };
 
 // Adds the public urgent care centers to the map
-var toggleableLayerIds0 = [ 'Public Secondary Schools'];
+var toggleableLayerIds0 = [ 'Public Secondary Schools', "TT: Secondary Ed"];
 
 var link0 = document.createElement('a');
 link0.href = '#';
@@ -974,8 +1220,6 @@ layer_menu.appendChild(link7);
 layer_menu.appendChild(link8);
 layer_menu.appendChild(link9);
 layer_menu.appendChild(link0);
-
-// --------------------------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------------------
 // Add a legend to the map
