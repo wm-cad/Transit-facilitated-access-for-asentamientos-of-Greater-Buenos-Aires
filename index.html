@@ -161,10 +161,7 @@
   <div><span-rec style="background-color: #00a1ff"></span-rec>Asentamientos</div>
   <div><span-rec style="background-color: gray"></span-rec>Studied department or <i>radio</i></div>
   <h3>Destinations</h3>
-  <div><span style="background-color: gold"></span>City/department centers</div>
-  <div><span style="background-color: #655745"></span>Railway Stations</div>
-  <div><span style="background-color: #ff0000"></span>Public Healthcare</div>
-  <div><span style="background-color: #148F77"></span>Public Schools</div>
+  <div><span style="background-color: #E65100"></span>Active destination</div>
   <h3>Travel Times</h3>
   <h3>(Census <i>Radios</i>)</h3>
   <div><span style="background-color: #cbf3a5"></span><i>Radio</i> without asent.</div>
@@ -196,11 +193,138 @@
 
 map.on('load', function () {
 
-  var zoom = map.getZoom();
-  var zoom_neg = zoom - 14;
-  var zoomFac_TTbsas = zoom_neg * -5;
-  var zoomFac_TTcbd = zoom_neg * -4;
-  var zoomFac_TTlow = zoom_neg * -2;
+  // BASE GEOGRAPHIC LAYERS ---------------------------------------------------------
+  //Adds the mancha urbana of the conurbano to the map
+   map.addLayer({
+         "id": "Mancha Urbana",
+         "type": "fill",
+         "source": {
+           type: 'vector',
+           url: 'mapbox://kjtitlowsorlie.1a772bi3',
+         },
+         "source-layer": "urban_amba_manchaurbana-9etucc",
+         //"layout":
+         "paint": {
+           "fill-opacity": 0.025
+         }
+   });
+
+   //Adds the three administrative districts to the map
+    map.addLayer({
+          "id": "Departments",
+          "type": "fill",
+          "source": {
+            type: 'vector',
+            url: 'mapbox://kjtitlowsorlie.d43g0qwy',
+          },
+          "source-layer": "admin_adm2_amba30-47m61p",
+          //"layout":
+          "maxzoom": 11,
+          "paint": {
+            "fill-opacity": 0.05
+          }
+    });
+
+    //Adds the three study districts to the map
+     map.addLayer({
+           "id": "Study Departments",
+           "type": "fill",
+           "source": {
+             type: 'vector',
+             url: 'mapbox://kjtitlowsorlie.5vk5qww6',
+           },
+           "source-layer": "admin_adm2_n3-4ryv1b",
+           //"layout":
+           "maxzoom": 11,
+           "paint": {
+             "fill-opacity": 0.05,
+             //"fill-color": "#FFFFFF",
+             "fill-outline-color": "#000000"
+           }
+     });
+
+     //Adds the major passenger rail lines to the map
+      map.addLayer({
+            "id": "Railway Lines",
+            "type": "line",
+            "source": {
+              type: 'vector',
+              url: 'mapbox://kjtitlowsorlie.04rgotuk',
+            },
+            "source-layer": "transport_amba24_rail-bb81bc"//,
+      });
+
+      //Adds the census radios from the three study departments to the map
+       map.addLayer({
+             "id": "Census Radios",
+             "type": "fill",
+             "source": {
+               type: 'vector',
+               url: 'mapbox://kjtitlowsorlie.4z51ae0v',
+             },
+             "source-layer": "indec_n3_radio-bsembm",
+             //"layout":
+             "minzoom": 10,
+             "paint": {
+               "fill-opacity": 0.1,
+               //"fill-color": "#FFFFFF",
+               "fill-outline-color": "#000000"
+             }
+       });
+
+      //Adds the census radios selected for travel time analysis
+       map.addLayer({
+             "id": "Census Radios Selected",
+             "type": "fill",
+             "source": {
+               type: 'vector',
+               url: 'mapbox://kjtitlowsorlie.206j3dn1',
+             },
+             "source-layer": "origin_radio_n3_INDEC-1w4x8m",
+             //"layout":
+             "minzoom": 10,
+             "paint": {
+               "fill-opacity": 0.1,
+               //"fill-color": '#',
+               //"fill-outline-color": "black"
+             }
+       });
+
+     //Adds the asentamientos to the map.
+      map.addLayer({
+            "id": "Asentamientos",
+            "type": "fill",
+            "source": {
+              type: 'vector',
+              url: 'mapbox://kjtitlowsorlie.3kqkd08u',
+            },
+            "source-layer": "techo_amba30_asent-8fr5iw",
+            //"layout":
+            "paint": {
+              "fill-opacity": 0.3,
+              "fill-color": "#199a75",
+              "fill-outline-color": "#10604a"
+            }
+      });
+
+     // When a click event occurs on a feature in the states layer, open a popup at the
+     // location of the click, with description HTML from its properties.
+     map.on('click', 'Asentamientos', function(e) {
+       new mapboxgl.Popup()
+         .setLngLat(e.lngLat)
+         .setHTML('<b>Asentamiento: </b><br>' + e.features[0].properties.nombre_barrio)
+         .addTo(map);
+     });
+
+     // Change the cursor to a pointer when the mouse is over the states layer.
+     map.on('mouseenter', 'Asentamientos', function() {
+     map.getCanvas().style.cursor = 'pointer';
+     });
+
+     // Change it back to a pointer when it leaves.
+     map.on('mouseleave', 'Asentamientos', function() {
+     map.getCanvas().style.cursor = '';
+     });
 
   // ORIGINS ---------------------------------------------------------
   // Adds the Buenos Aires CBD travel times to the map
@@ -216,23 +340,27 @@ map.on('load', function () {
              "visibility": "none"
          },
          "paint": {
-           "circle-radius":
-                ['/', ['get', 'trvtime_cbd_bsas'], zoomFac_TTbsas],
+           "circle-radius": [
+                   'interpolate', ['linear'], ['zoom'],
+                   9, ['/', ['number', ['get', 'trvtime_cbd_bsas']], 30],
+                   11, ['/', ['number', ['get', 'trvtime_cbd_bsas']], 20],
+                   13, ['/', ['number', ['get', 'trvtime_cbd_bsas']], 10],
+            ],
            "circle-color": [
                 'match',
                 ['get', 'COVERAGE_TYPE'],
-                'NONE', '#DCEDC8',
-                'MIN', '#8BC34A',
-                'MAJ', '#33691E',
+                'NONE', '#decbf0',
+                'MIN', '#8e4ccd',
+                'MAJ', '#5b278b',
                 /* other */ '#ccc'
-           ],
+            ],
            "circle-stroke-width": 0.8,
            "circle-stroke-color": [
              'match',
              ['get', 'COVERAGE_TYPE'],
-             'NONE', '#196F3D',
-             'MIN', '#196F3D',
-             'MAJ', '#196F3D',
+             'NONE', '#8e4ccd',
+             'MIN', '#491f6f',
+             'MAJ', '#2a1240',
              /* other */ '#ccc'
             ]
          }
@@ -243,7 +371,7 @@ map.on('load', function () {
    map.on('click', 'TT: BsAs CBD', function(e) {
      new mapboxgl.Popup()
        .setLngLat(e.lngLat)
-       .setHTML('<table><tr><td>>To Buenos Aires:</td><td>' + e.features[0].properties.trvtime_cbd_bsas) + '</td></tr></table>'
+       .setHTML(e.features[0].properties.trvtime_cbd_bsas)
        .addTo(map);
    });
 
@@ -270,25 +398,29 @@ map.on('load', function () {
               "visibility": "none"
           },
           "paint": {
-            "circle-radius":
-                 ['/', ['get', 'trvtime_cbd_loc'], zoomFac_TTcbd],
-            "circle-color": [
-                 'match',
-                 ['get', 'COVERAGE_TYPE'],
-                 'NONE', '#cbf3a5',
-                 'MIN', '#f3dda5',
-                 'MAJ', '#f3a5a5',
-                 /* other */ '#ccc'
-            ],
-            "circle-stroke-width": 1,
-            "circle-stroke-color": [
-              'match',
-              ['get', 'COVERAGE_TYPE'],
-              'NONE', '#217109',
-              'MIN', '#b3900f',
-              'MAJ', '#8e120b',
-              /* other */ '#ccc'
-             ]
+            "circle-radius": [
+                    'interpolate', ['linear'], ['zoom'],
+                    9, ['/', ['number', ['get', 'trvtime_cbd_loc']], 30],
+                    11, ['/', ['number', ['get', 'trvtime_cbd_loc']], 15],
+                    13, ['/', ['number', ['get', 'trvtime_cbd_loc']], 5],
+             ],
+             "circle-color": [
+                  'match',
+                  ['get', 'COVERAGE_TYPE'],
+                  'NONE', '#decbf0',
+                  'MIN', '#8e4ccd',
+                  'MAJ', '#5b278b',
+                  /* other */ '#ccc'
+              ],
+             "circle-stroke-width": 0.8,
+             "circle-stroke-color": [
+               'match',
+               ['get', 'COVERAGE_TYPE'],
+               'NONE', '#8e4ccd',
+               'MIN', '#491f6f',
+               'MAJ', '#2a1240',
+               /* other */ '#ccc'
+              ]
           }
     });
 
@@ -305,27 +437,32 @@ map.on('load', function () {
                "visibility": "none"
            },
            "paint": {
-             "circle-radius":
-                  ['/', ['get', 'trvtime_cbd_ngh_min'], zoomFac_TTcbd],
+             "circle-radius": [
+                     'interpolate', ['linear'], ['zoom'],
+                     9, ['/', ['number', ['get', 'trvtime_cbd_ngh_min']], 30],
+                     11, ['/', ['number', ['get', 'trvtime_cbd_ngh_min']], 15],
+                     13, ['/', ['number', ['get', 'trvtime_cbd_ngh_min']], 5],
+              ],
              "circle-color": [
                   'match',
-                  ['get', 'COVERAGE_TYPE'],
-                  'NONE', '#cbf3a5',
-                  'MIN', '#f3dda5',
-                  'MAJ', '#f3a5a5',
-                  /* other */ '#ccc'
+                       ['get', 'COVERAGE_TYPE'],
+                       'NONE', '#decbf0',
+                       'MIN', '#8e4ccd',
+                       'MAJ', '#5b278b',
+                       /* other */ '#ccc'
              ],
-             "circle-stroke-width": 1,
+             "circle-stroke-width": 0.8,
              "circle-stroke-color": [
-               'match',
-               ['get', 'COVERAGE_TYPE'],
-               'NONE', '#217109',
-               'MIN', '#b3900f',
-               'MAJ', '#8e120b',
-               /* other */ '#ccc'
-              ]
+                    'match',
+                    ['get', 'COVERAGE_TYPE'],
+                    'NONE', '#8e4ccd',
+                    'MIN', '#491f6f',
+                    'MAJ', '#2a1240',
+                    /* other */ '#ccc'
+             ]
            }
      });
+
 
      // Adds the railway station travel times to the map
     map.addLayer({
@@ -340,25 +477,29 @@ map.on('load', function () {
                 "visibility": "none"
             },
             "paint": {
-              "circle-radius":
-                   ['/', ['get', 'trvtime_rail_min'], 30],
-              "circle-color": [
-                   'match',
-                   ['get', 'COVERAGE_TYPE'],
-                   'NONE', '#cbf3a5',
-                   'MIN', '#f3dda5',
-                   'MAJ', '#f3a5a5',
-                   /* other */ '#ccc'
+              "circle-radius": [
+                      'interpolate', ['linear'], ['zoom'],
+                      9, ['/', ['number', ['get', 'trvtime_rail_min']], 20],
+                      11, ['/', ['number', ['get', 'trvtime_rail_min']], 10],
+                      13, ['/', ['number', ['get', 'trvtime_rail_min']], 5],
               ],
-              "circle-stroke-width": 1,
+              "circle-color": [
+                    'match',
+                        ['get', 'COVERAGE_TYPE'],
+                        'NONE', '#decbf0',
+                        'MIN', '#8e4ccd',
+                        'MAJ', '#5b278b',
+                        /* other */ '#ccc'
+              ],
+              "circle-stroke-width": 0.8,
               "circle-stroke-color": [
-                'match',
-                ['get', 'COVERAGE_TYPE'],
-                'NONE', '#217109',
-                'MIN', '#b3900f',
-                'MAJ', '#8e120b',
-                /* other */ '#ccc'
-               ]
+                     'match',
+                        ['get', 'COVERAGE_TYPE'],
+                        'NONE', '#8e4ccd',
+                        'MIN', '#491f6f',
+                        'MAJ', '#2a1240',
+                        /* other */ '#ccc'
+              ]
             }
       });
 
@@ -410,8 +551,12 @@ map.on('load', function () {
                   "visibility": "none"
               },
               "paint": {
-                "circle-radius":
-                     ['/', ['get', 'trvtime_hspt_min'], 15],
+                "circle-radius": [
+                        'interpolate', ['linear'], ['zoom'],
+                        9, ['/', ['number', ['get', 'trvtime_hspt_min']], 15],
+                        11, ['/', ['number', ['get', 'trvtime_hspt_min']], 10],
+                        13, ['/', ['number', ['get', 'trvtime_hspt_min']], 5],
+                      ],
                 "circle-color": [
                      'match',
                      ['get', 'COVERAGE_TYPE'],
@@ -480,25 +625,29 @@ map.on('load', function () {
                     "visibility": "none"
                 },
                 "paint": {
-                  "circle-radius":
-                       ['/', ['get', 'trvtime_edknd_min'], 3],
-                  "circle-color": [
-                       'match',
-                       ['get', 'COVERAGE_TYPE'],
-                       'NONE', '#cbf3a5',
-                       'MIN', '#f3dda5',
-                       'MAJ', '#f3a5a5',
-                       /* other */ '#ccc'
+                  "circle-radius": [
+                          'interpolate', ['linear'], ['zoom'],
+                          9, ['/', ['number', ['get', 'trvtime_edknd_min']], 5],
+                          11, ['/', ['number', ['get', 'trvtime_edknd_min']], 2.5],
+                          13, ['/', ['number', ['get', 'trvtime_edknd_min']], 1],
                   ],
-                  "circle-stroke-width": 1,
+                  "circle-color": [
+                        'match',
+                            ['get', 'COVERAGE_TYPE'],
+                            'NONE', '#decbf0',
+                            'MIN', '#8e4ccd',
+                            'MAJ', '#5b278b',
+                            /* other */ '#ccc'
+                  ],
+                  "circle-stroke-width": 0.8,
                   "circle-stroke-color": [
-                    'match',
-                    ['get', 'COVERAGE_TYPE'],
-                    'NONE', '#217109',
-                    'MIN', '#b3900f',
-                    'MAJ', '#8e120b',
-                    /* other */ '#ccc'
-                   ]
+                         'match',
+                            ['get', 'COVERAGE_TYPE'],
+                            'NONE', '#8e4ccd',
+                            'MIN', '#491f6f',
+                            'MAJ', '#2a1240',
+                            /* other */ '#ccc'
+                  ]
                 }
           });
 
@@ -588,8 +737,8 @@ map.on('load', function () {
          "filter": ["==", "nivel", 'Nivel Inicial'],
          "minzoom": 12,
          "paint": {
-           "circle-radius": 2,
-           "circle-color": "#1B4F72"
+           "circle-radius": 4,
+           "circle-color": "#E65100"
          }
    });
 
@@ -608,8 +757,8 @@ map.on('load', function () {
           "filter": ["==", "nivel", 'Nivel Primario'],
           "minzoom": 12,
           "paint": {
-            "circle-radius": 2,
-            "circle-color": "#1B4F72"
+            "circle-radius": 4,
+            "circle-color": "#E65100"
           }
     });
 
@@ -629,8 +778,8 @@ map.on('load', function () {
               "filter": ["==", "nivel", 'Nivel Secundario'],
               "minzoom": 12,
               "paint": {
-                "circle-radius": 2,
-                "circle-color": "#1B4F72"
+                "circle-radius": 4,
+                "circle-color": "#E65100"
               }
         });
 
@@ -650,8 +799,8 @@ map.on('load', function () {
         "filter": ["==", ["get", "provincia"], "Buenos Aires"],
         "minzoom": 12,
         "paint": {
-          "circle-radius": 2,
-          "circle-color": "#ff0000"
+          "circle-radius": 4,
+          "circle-color": "#E65100"
         }
   });
 
@@ -670,8 +819,8 @@ map.on('load', function () {
          "filter": ["==", ["get", "provincia"], "Buenos Aires"],
          "minzoom": 12,
          "paint": {
-           "circle-radius": 2,
-           "circle-color": "#ff0000"
+           "circle-radius": 4,
+           "circle-color": "#E65100"
          }
    });
 
@@ -689,8 +838,8 @@ map.on('load', function () {
           },
           "minzoom": 12,
           "paint": {
-            "circle-radius": 2,
-            "circle-color": "#ff0000"
+            "circle-radius": 4,
+            "circle-color": "#E65100"
           }
     });
 
@@ -704,10 +853,12 @@ map.on('load', function () {
           url: 'mapbox://kjtitlowsorlie.ck2hr20v70bl22ons6yqz7v2i-2m3e1',
         },
         "source-layer": "transport_rail_stations",
-        //"layout":
+        "layout": {
+          "visibility": "none"
+        },
         "paint": {
-          "circle-radius": 2,
-          "circle-color": "#655745"
+          "circle-radius": 4,
+          "circle-color": "#E65100"
         }
   });
 
@@ -725,9 +876,9 @@ map.on('load', function () {
            "visibility": "none"
         },
         "paint": {
-          "circle-radius": 5,
-          "circle-color": "#deb72a",
-          'circle-stroke-color': '#7d6614',
+          "circle-radius": 4,
+          "circle-color": "#E65100",
+          'circle-stroke-color': '#E65100',
           'circle-stroke-width': 1,
         }
   });
@@ -745,9 +896,9 @@ map.on('load', function () {
            "visibility": "none"
         },
         "paint": {
-          "circle-radius": 6,
-          "circle-color": "#deb72a",
-          'circle-stroke-color': '#7d6614',
+          "circle-radius": 5,
+          "circle-color": "#E65100",
+          'circle-stroke-color': '#E65100',
           'circle-stroke-width': 1,
         }
   });
@@ -765,9 +916,9 @@ map.on('load', function () {
            "visibility": "none"
         },
         "paint": {
-          "circle-radius": 6,
-          "circle-color": "#deb72a",
-          'circle-stroke-color': '#7d6614',
+          "circle-radius": 5,
+          "circle-color": "#E65100",
+          'circle-stroke-color': '#E65100',
           'circle-stroke-width': 1,
         }
   });
@@ -785,9 +936,9 @@ map.on('load', function () {
            "visibility": "none"
         },
         "paint": {
-          "circle-radius": 6,
-          "circle-color": "#deb72a",
-          'circle-stroke-color': '#7d6614',
+          "circle-radius": 5,
+          "circle-color": "#E65100",
+          'circle-stroke-color': '#E65100',
           'circle-stroke-width': 1,
         }
   });
@@ -807,148 +958,11 @@ map.on('load', function () {
         },
         "paint": {
           "circle-radius": 6,
-          "circle-color": "#FFCC80",
+          "circle-color": "#E65100",
           'circle-stroke-color': '#E65100',
-          'circle-stroke-width': 3,
+          'circle-stroke-width': 1,
         }
   });
-
-
-
-   //Adds the major passenger rail lines to the map
-    map.addLayer({
-          "id": "Railway Lines",
-          "type": "line",
-          "source": {
-            type: 'vector',
-            url: 'mapbox://kjtitlowsorlie.04rgotuk',
-          },
-          "source-layer": "transport_amba24_rail-bb81bc"//,
-    });
-
-
-
-    //Adds the census radios selected for travel time analysis
-     map.addLayer({
-           "id": "Census Radios Selected",
-           "type": "fill",
-           "source": {
-             type: 'vector',
-             url: 'mapbox://kjtitlowsorlie.206j3dn1',
-           },
-           "source-layer": "origin_radio_n3_INDEC-1w4x8m",
-           //"layout":
-           "minzoom": 11,
-           "paint": {
-             "fill-opacity": 0.1,
-             //"fill-color": '#',
-             //"fill-outline-color": "black"
-           }
-     });
-
-  //Adds the census radios from the three study departments to the map
-   map.addLayer({
-         "id": "Census Radios",
-         "type": "fill",
-         "source": {
-           type: 'vector',
-           url: 'mapbox://kjtitlowsorlie.4z51ae0v',
-         },
-         "source-layer": "indec_n3_radio-bsembm",
-         //"layout":
-         "minzoom": 11,
-         "paint": {
-           "fill-opacity": 0.1,
-           //"fill-color": "#FFFFFF",
-           "fill-outline-color": "#000000"
-         }
-   });
-
-
-
-   //Adds the three study districts to the map
-    map.addLayer({
-          "id": "Study Departments",
-          "type": "fill",
-          "source": {
-            type: 'vector',
-            url: 'mapbox://kjtitlowsorlie.5vk5qww6',
-          },
-          "source-layer": "admin_adm2_n3-4ryv1b",
-          //"layout":
-          "maxzoom": 11,
-          "paint": {
-            "fill-opacity": 0.1,
-            //"fill-color": "#FFFFFF",
-            "fill-outline-color": "#000000"
-          }
-    });
-
-    //Adds the  mancha urbana to the map
-     map.addLayer({
-           "id": "Mancha Urbana",
-           "type": "fill",
-           "source": {
-             type: 'vector',
-             url: 'mapbox://kjtitlowsorlie.1a772bi3',
-           },
-           "source-layer": "urban_amba_manchaurbana-9etucc",
-           //"layout":
-           "paint": {
-             "fill-opacity": 0.025
-           }
-     });
-
- //Adds the administrative districts to the map
-  map.addLayer({
-        "id": "Departments",
-        "type": "fill",
-        "source": {
-          type: 'vector',
-          url: 'mapbox://kjtitlowsorlie.d43g0qwy',
-        },
-        "source-layer": "admin_adm2_amba30-47m61p",
-        //"layout":
-        "maxzoom": 11,
-        "paint": {
-          "fill-opacity": 0.05
-        }
-  });
-
-  //Adds the asentamientos to the map.
-   map.addLayer({
-         "id": "Asentamientos",
-         "type": "fill",
-         "source": {
-           type: 'vector',
-           url: 'mapbox://kjtitlowsorlie.3kqkd08u',
-         },
-         "source-layer": "techo_amba30_asent-8fr5iw",
-         //"layout":
-         "paint": {
-           "fill-opacity": 0.2,
-           "fill-color": "#00a1ff"
-         }
-   });
-
-   // When a click event occurs on a feature in the states layer, open a popup at the
-   // location of the click, with description HTML from its properties.
-   map.on('click', 'Asentamientos', function(e) {
-     new mapboxgl.Popup()
-       .setLngLat(e.lngLat)
-       .setHTML('<b>Asentamiento: </b><br>' + e.features[0].properties.nombre_barrio)
-       .addTo(map);
-   });
-
-   // Change the cursor to a pointer when the mouse is over the states layer.
-   map.on('mouseenter', 'Asentamientos', function() {
-   map.getCanvas().style.cursor = 'pointer';
-   });
-
-   // Change it back to a pointer when it leaves.
-   map.on('mouseleave', 'Asentamientos', function() {
-   map.getCanvas().style.cursor = '';
-   });
 
 });
 
